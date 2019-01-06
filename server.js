@@ -41,30 +41,8 @@ app.prepare()
       container.inspect((err, data) => res.send(`${data.State.Pid}`))
     })
 
-    server.get('/fs', (req, res) => {
+    server.get('/fs', async (req, res) => {
       assert(req.query.directory)
-
-      const isBinary = file => {
-        return new Promise((resolve, reject) => {
-          fs.readFile(file, (err, buf) => {
-            fs.lstat(file, (err, stat) => {
-              isBinaryFile(buf, stat.size, (err, result) => {
-                if (err) {
-                  reject(err)
-                  return
-                }
-                resolve(result)
-              });
-            });
-          })
-        })
-      }
-
-      const locateLink = path => {
-        return new Promise((resolve, reject) => {
-          fs.readlink(path, (err, targetpath) => resolve(targetpath))
-        })
-      }
 
       const walk = (dir, done) => {
         let results = []
@@ -87,19 +65,15 @@ app.prepare()
               res = {
                 name: file,
                 path: fullpath,
-                isDir: stat.isDirectory(),
+                isDirectory: stat.isDirectory(),
                 isSymlink: stat.isSymbolicLink(),
-                isWatchable: !!(stat.ino > 100), // @TODO: find the real number
-              }
-              if (stat.isFile()) {
-                isBinary(fullpath)
-                  .then(binary => res.isBinary = binary)
-                  .catch(console.error)
+                // source: https://ext4.wiki.kernel.org/index.php/Ext4_Disk_Layout#Special_inodes
+                isDisabled: !!(stat.ino >= 12),
               }
               if (stat.isSymbolicLink()) {
-                locateLink(fullpath)
-                  .then(targetpath => res.targetPath = targetpath)
-                  .catch(console.error)
+                res.targetPath = fs.readlinkSync(fullpath)
+              } else if (stat.isFile()) {
+                res.isBinary = isBinaryFile.sync(fullpath)
               }
               results.push(res)
               next(res)

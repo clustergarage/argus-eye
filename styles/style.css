@@ -1,1 +1,10 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
 
+i.checked svg polyline {
+  color: #27ab83;
+}
+
+i.disabled svg line {
+  color: #9fb3c8;
+  /*color: #bcccdc;*/
+}

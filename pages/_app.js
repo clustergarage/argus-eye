@@ -5,8 +5,6 @@ import withRedux from 'next-redux-wrapper'
 
 import {initializeStore} from '../store/store'
 
-import 'milligram/dist/milligram.css'
-
 class ArgusTool extends App {
   static async getInitialProps({Component, ctx}) {
     const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {}

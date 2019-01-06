@@ -1,8 +1,6 @@
 import React from 'react'
 import {connect, Provider} from 'react-redux'
 import {
-  ChevronDown,
-  ChevronRight,
   File,
   FileText,
   Folder,
@@ -41,6 +39,10 @@ class FileTree extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.state.files.length || this.loadDirectory()
+  }
+
   componentDidUpdate({directory, files}) {
     const {
       directory: newDirectory,
@@ -77,12 +79,13 @@ class FileTree extends React.Component {
       this.state.files.length > 0 &&
       <ul>
         {this.state.files.map(file => {
-          if (!file.isWatchable) {
+          if (!file.isDisabled) {
             return (
               <li key={file.path}>
-                <i><XSquare size={iconSize} /></i>
+                <i className="disabled"><XSquare size={iconSize} /></i>
                 <a>
-                  <i>{file.isDir ? <Folder size={iconSize} /> : (file.isBinary ? <File size={iconSize} /> : <FileText size={iconSize} />)}</i>
+                  <i>{file.isDirectory ? <Folder size={iconSize} /> :
+                    (file.isBinary ? <File size={iconSize} /> : <FileText size={iconSize} />)}</i>
                   {file.name}
                 </a>
               </li>
@@ -90,14 +93,14 @@ class FileTree extends React.Component {
           } else if (file.isSymlink) {
             return (
               <li key={file.path}>
-                <i><Square size={iconSize} /></i>
-                <a>
+                <i className="disabled"><Square size={iconSize} /></i>
+                <a className="symlink">
                   <i><Folder size={iconSize} /></i>
-                  {file.name} -&gt; {file.targetPath}
+                  {file.name} <em>-> {file.targetPath}</em>
                 </a>
               </li>
             )
-          } else if (file.isDir) {
+          } else if (file.isDirectory) {
             return (
               <li key={file.path}>
                 <i><Square size={iconSize} /></i>
@@ -137,12 +140,13 @@ class FileTree extends React.Component {
           ul ul {
             border-left: 1px dotted #ddd;
             margin: 0 0 0 1rem;
-            padding: 0 0 0 3rem;
+            padding: 0.5rem 0 0.5rem 2rem;
           }
 
           li {
+            font-family: 'Ubuntu Mono', monospace;
             list-style: none;
-            margin: 0.5rem 0;
+            margin: 0;
           }
 
           li i {
@@ -154,6 +158,12 @@ class FileTree extends React.Component {
             font-size: 1.5rem;
             vertical-align: top;
             cursor: pointer;
+          }
+
+          li a.symlink em {
+            color: #627d98;
+            font-style: normal;
+            vertical-align: inherit;
           }
         `}</style>
       </ul>

@@ -59,14 +59,20 @@ class Index extends React.Component {
   render() {
     let podsHeader, containersHeader, fsHeader
     if (this.state.pods.length) {
-      podsHeader = <h2>Pods</h2>
+      podsHeader = <h4>Found pods</h4>
     }
     if (this.state.directory) {
       fsHeader = (
-        <h4>
-          Filesystem&nbsp;
-          <small>({this.state.directory})</small>
-        </h4>
+        <h2>
+          File Viewer&nbsp;
+          <small>(PID: {this.state.directory.split('/')[2]})</small>
+
+          <style jsx>{`
+            small {
+              font: 1.75rem "Ubuntu Mono", monospace;
+            }
+          `}</style>
+        </h2>
       )
     }
 
@@ -108,13 +114,20 @@ class Index extends React.Component {
             ))}
           </div>}
 
-        {fsHeader}
-        <FileTree directory={this.state.directory} />
+        <div className="file-viewer">
+          {fsHeader}
+          <FileTree directory={this.state.directory} />
+        </div>
 
         <style jsx>{`
           h1 i {
             vertical-align: sub;
             margin: 1rem 0 0 1rem;
+          }
+
+          input[type="text"] {
+            color: #627d98;
+            font: 1.6rem 'Ubuntu Mono', monospace;
           }
 
           a.button {
@@ -124,6 +137,10 @@ class Index extends React.Component {
           .container-select i {
             vertical-align: sub;
             margin-right: 0.5rem;
+          }
+
+          .file-viewer {
+            margin-top: 4rem;
           }
         `}</style>
       </Layout>

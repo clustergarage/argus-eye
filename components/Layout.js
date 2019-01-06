@@ -1,5 +1,8 @@
 import Header from './Header'
 
+import 'milligram/dist/milligram.css'
+import '../styles/style.css'
+
 const layoutStyle = {
   margin: 20,
   //padding: 20,
