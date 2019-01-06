@@ -39,14 +39,23 @@ class Index extends React.Component {
     this.loadContainers(pod)
   }
 
-  async handleContainerClick(id) {
-    this.loadRootDirectory(id)
+  async handleContainerClick(cid) {
+    this.loadRootDirectory(cid)
   }
 
   async loadPods() {
     const pods = await searchPods(this.state.selector)
     this.setState({pods})
-    this.props.dispatchLoadPods(pods)
+    this.props.dispatchLoadPods(pods.map(pod => {
+      return {
+        metadata: Object.keys(pod.metadata)
+          .filter(key => ['uid', 'namespace', 'name'].includes(key))
+          .reduce((obj, key) => {
+            obj[key] = pod.metadata[key]
+            return obj
+          }, {})
+      }
+    }))
   }
 
   async loadContainers(pod) {
@@ -54,7 +63,14 @@ class Index extends React.Component {
     this.setState({selectedPod: uid})
     const containers = await podContainers(namespace, name)
     this.setState({containers})
-    this.props.dispatchLoadContainers(uid, containers)
+    this.props.dispatchLoadContainers(uid, containers.map(container => {
+      return Object.keys(container)
+        .filter(key => ['containerID', 'name'].includes(key))
+        .reduce((obj, key) => {
+          obj[key] = container[key]
+          return obj
+        }, {})
+    }))
   }
 
   async loadRootDirectory(cid) {
