@@ -3,6 +3,7 @@ const express = require('express'),
   assert = require('assert'),
   //bodyParser = require('body-parser'),
   fs = require('fs'),
+  isBinaryFile = require("isbinaryfile"),
   k8s = require('@kubernetes/client-node'),
   dockerode = require('dockerode')
 
@@ -43,28 +44,31 @@ app.prepare()
     server.get('/fs', (req, res) => {
       assert(req.query.directory)
 
-			const isBinary = file => {
-				return new Promise(function(resolve, reject) {
-					fs.readFile(file, function(err, buf) {
-						let ret = false
-						if (err) {
-							reject(err)
-							return
-						}
-						for (let i = 0, len = buf.length; i < len; ++i) {
-							if (buf[i] > 127) {
-								ret = true
-								break
-							}
-						}
-						resolve(ret)
-					})
-				})
-			}
+      const isBinary = file => {
+        return new Promise((resolve, reject) => {
+          fs.readFile(file, (err, buf) => {
+            fs.lstat(file, (err, stat) => {
+              isBinaryFile(buf, stat.size, (err, result) => {
+                if (err) {
+                  reject(err)
+                  return
+                }
+                resolve(result)
+              });
+            });
+          })
+        })
+      }
+
+      const locateLink = path => {
+        return new Promise((resolve, reject) => {
+          fs.readlink(path, (err, targetpath) => resolve(targetpath))
+        })
+      }
 
       const walk = (dir, done) => {
         let results = []
-        let obj = {path: dir}
+        let result = {path: dir}
 
         fs.readdir(dir, (err, list) => {
           let i = 0
@@ -72,35 +76,36 @@ app.prepare()
             return done(err)
           }
 
-          const next = (ob) => {
+          const next = (res) => {
             let file = list[i++]
             if (!file) {
               return done(null, results)
             }
             let fullpath = dir + '/' + file
 
-            fs.stat(fullpath, (err, stat) => {
-							if (!stat ||
-								// skip dev,sys,proc directories via inode check
-								(stat.ino == 1 || stat.ino == 2)) {
-								next(ob)
-							} else {
-								ob = {
-									name: file,
-									path: fullpath,
-									isDir: stat.isDirectory(),
-								}
-								if (stat.isFile()) {
-									isBinary(fullpath)
-										.then(binary => ob.isBinary = binary)
-										.catch(console.error)
-								}
-								results.push(ob)
-								next(ob)
-							}
+            fs.lstat(fullpath, (err, stat) => {
+              res = {
+                name: file,
+                path: fullpath,
+                isDir: stat.isDirectory(),
+                isSymlink: stat.isSymbolicLink(),
+                isWatchable: !!(stat.ino > 100), // @TODO: find the real number
+              }
+              if (stat.isFile()) {
+                isBinary(fullpath)
+                  .then(binary => res.isBinary = binary)
+                  .catch(console.error)
+              }
+              if (stat.isSymbolicLink()) {
+                locateLink(fullpath)
+                  .then(targetpath => res.targetPath = targetpath)
+                  .catch(console.error)
+              }
+              results.push(res)
+              next(res)
             })
           }
-          next(obj)
+          next(result)
         })
       }
 
