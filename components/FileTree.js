@@ -11,32 +11,18 @@ import {
   XSquare,
 } from 'react-feather'
 
-import {
-  toggleVisibility,
-  openDirectory,
-  mapState,
-  mapDispatch,
-} from '../reducers/file-tree'
+import {mapState, mapDispatch} from '../reducers/file-tree'
 import {loadFSTree} from '../lib/api'
 
 class FileTree extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {files: this.props.files || []}
+    this.state = {
+      files: this.props.files || [],
+    }
 
     this.handleDirectoryClick = this.handleDirectoryClick.bind(this)
     this.onFileClick = this.onFileClick.bind(this)
-  }
-
-  async loadDirectory() {
-    if (this.props.openedDirectories &&
-      this.props.openedDirectories[this.props.directory]) {
-
-      this.setState({files: this.props.openedDirectories[this.props.directory]})
-    } else if (this.props.directory) {
-      const files = await loadFSTree(this.props.directory)
-      this.setState({files})
-    }
   }
 
   componentDidMount() {
@@ -51,18 +37,25 @@ class FileTree extends React.Component {
 
     if ((newDirectory && newDirectory !== directory) ||
       (newFiles && newFiles !== files)) {
-
       this.loadDirectory()
+    }
+  }
+
+  async loadDirectory() {
+    if (this.props.openedDirectories &&
+      this.props.openedDirectories[this.props.directory]) {
+      this.setState({files: this.props.openedDirectories[this.props.directory]})
+    } else if (this.props.directory) {
+      const files = await loadFSTree(this.props.directory)
+      this.setState({files})
     }
   }
 
   async handleDirectoryClick(file) {
     this.props.toggleVisibility(file.path)
-
     if ((this.props.openedDirectories &&
       !this.props.openedDirectories[file.path]) ||
       this.props.isVisible[file.path]) {
-
       file.files = await loadFSTree(file.path)
       this.props.dispatchOpenDirectory(file.path, file.files)
     }

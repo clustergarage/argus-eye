@@ -25,14 +25,14 @@ app.prepare()
     server.get('/k8s/pods/:selector', (req, res) => {
       assert(req.params.selector)
       k8sApi.listPodForAllNamespaces(null, null, null, req.params.selector)
-        .then((result) => res.send(result.body))
+        .then(result => res.send(result.body))
     })
 
     server.get('/k8s/:namespace/pod/:name/containers', (req, res) => {
       assert(req.params.namespace)
       assert(req.params.name)
       k8sApi.readNamespacedPod(req.params.name, req.params.namespace)
-        .then((result) => res.send(result.body))
+        .then(result => res.send(result.body))
     })
 
     server.get('/docker/container/:id/pid', (req, res) => {

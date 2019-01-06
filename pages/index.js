@@ -4,21 +4,19 @@ import {CornerDownRight, Eye} from 'react-feather'
 
 import Layout from '../components/Layout'
 import FileTree from '../components/FileTree'
-import {
-  searchPods,
-  podContainers,
-  containerPID,
-  loadFSTree,
-} from '../lib/api'
+import {mapState, mapDispatch} from '../reducers/search'
+import {searchPods, podContainers, containerPID} from '../lib/api'
 
 class Index extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      selector: '',   // k8s label selector to find pods
-      pods: [],       // list of current searched pods
-      containers: [], // optional picker for when multiple containers are in a single selected pod
-      files: [],      // selected pids filesystem tree
+      selector: this.props.selector || '',
+      pods: this.props.pods || [],
+      selectedPod: this.props.selectedPod || '',
+      containers: this.props.containers || [],
+      selectedContainer: this.props.selectedContainer || '',
+      directory: this.props.directory || '',
     }
 
     this.handleSelectorChange = this.handleSelectorChange.bind(this)
@@ -33,27 +31,38 @@ class Index extends React.Component {
 
   async handleSelectorSubmit(event) {
     event.preventDefault()
-    const pods = await searchPods(this.state.selector)
-    this.setState({pods})
+    this.props.dispatchLoadSelector(this.state.selector)
+    this.loadPods()
   }
 
-  async handlePodClick({uid, namespace, name}) {
-    this.setState({selectedPod: uid})
-    // @TODO: if only one container status comes back, immediately pick that PID
-    const containers = await podContainers(namespace, name)
-    this.setState({containers})
+  async handlePodClick(pod) {
+    this.loadContainers(pod)
   }
 
   async handleContainerClick(id) {
-    this.setState({
-      selectedContainer: id,
-      isLoading: true,
-    })
-    const pid = await containerPID(id)
-    this.setState({
-      directory: `/proc/${pid}/root`,
-      isLoading: false,
-    })
+    this.loadRootDirectory(id)
+  }
+
+  async loadPods() {
+    const pods = await searchPods(this.state.selector)
+    this.setState({pods})
+    this.props.dispatchLoadPods(pods)
+  }
+
+  async loadContainers(pod) {
+    const {uid, namespace, name} = pod.metadata
+    this.setState({selectedPod: uid})
+    const containers = await podContainers(namespace, name)
+    this.setState({containers})
+    this.props.dispatchLoadContainers(uid, containers)
+  }
+
+  async loadRootDirectory(cid) {
+    this.setState({selectedContainer: cid})
+    const pid = await containerPID(cid)
+    const directory = `/proc/${pid}/root`
+    this.setState({directory})
+    this.props.dispatchLoadRootDirectory(cid, directory)
   }
 
   render() {
@@ -97,7 +106,7 @@ class Index extends React.Component {
         {this.state.pods.map(pod => (
           <a key={pod.metadata.uid}
             className={`button ${this.state.selectedPod !== pod.metadata.uid ? 'button-outline' : ''}`}
-            onClick={() => this.handlePodClick(pod.metadata)}>
+            onClick={() => this.handlePodClick(pod)}>
             {pod.metadata.name}
           </a>
         ))}
@@ -148,4 +157,4 @@ class Index extends React.Component {
   }
 }
 
-export default connect()(Index)
+export default connect(mapState, mapDispatch)(Index)
