@@ -17,11 +17,6 @@ import {
 class Index extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      directory: this.props.directory || '',
-      subjects: this.props.subjects || [],
-      selectedSubject: this.props.selectedSubject,
-    }
 
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
@@ -32,16 +27,11 @@ class Index extends React.Component {
   }
 
   onLoadRootDirectory(cid, directory) {
-    this.setState({directory})
     this.props.dispatchSetRootDirectory(cid, directory)
 
-    if (!this.state.selectedSubject) {
-      // @TODO: make this a user action
-      this.props.dispatchCreateSubject()
-      const index = this.props.subjects.length - 1
-      this.setState({selectedSubject: index})
-      this.props.dispatchSelectSubject(index)
-    }
+    // @TODO: make this a user action
+    this.props.dispatchCreateSubject()
+    this.props.dispatchSelectSubject(this.props.subjects.length - 1)
   }
 
   render() {
@@ -56,13 +46,13 @@ class Index extends React.Component {
           onLoadRootDirectory={this.onLoadRootDirectory} />
 
         <div className="file-viewer">
-          {this.state.directory &&
+          {this.props.directory &&
             <h2>
               File Viewer&nbsp;
-              <small>(PID: {this.state.directory.split('/')[2]})</small>
+              <small>(PID: {this.props.directory.split('/')[2]})</small>
             </h2>}
-            <FileTree directory={this.state.directory}
-              subject={this.state.selectedSubject} />
+            <FileTree directory={this.props.directory}
+              subject={this.props.selectedSubject} />
         </div>
 
         <style jsx>{`

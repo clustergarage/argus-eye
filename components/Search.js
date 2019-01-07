@@ -10,10 +10,6 @@ class Search extends React.Component {
     super(props)
     this.state = {
       labelSelector: this.props.labelSelector || '',
-      pods: this.props.pods || [],
-      selectedPod: this.props.selectedPod || '',
-      containers: this.props.containers || [],
-      selectedContainer: this.props.selectedContainer || '',
     }
 
     this.handleLabelSelectorChange = this.handleLabelSelectorChange.bind(this)
@@ -33,7 +29,6 @@ class Search extends React.Component {
     this.props.onSelectorSubmit && this.props.onSelectorSubmit(this.state.labelSelector)
 
     const pods = await searchPods(this.state.labelSelector)
-    this.setState({pods})
     this.props.dispatchSetPods(pods.map(pod => {
       return {
         metadata: Object.keys(pod.metadata)
@@ -48,10 +43,7 @@ class Search extends React.Component {
 
   async handlePodClick(pod) {
     const {uid, namespace, name} = pod.metadata
-    this.setState({selectedPod: uid})
-
     const containers = await podContainers(namespace, name)
-    this.setState({containers})
     this.props.dispatchSetContainers(uid, containers.map(container => {
       return Object.keys(container)
         .filter(key => ['containerID', 'name'].includes(key))
@@ -63,7 +55,6 @@ class Search extends React.Component {
   }
 
   async handleContainerClick(cid) {
-    this.setState({selectedContainer: cid})
     const pid = await containerPID(cid)
     this.props.onLoadRootDirectory && this.props.onLoadRootDirectory(cid, `/proc/${pid}/root`)
   }
@@ -81,21 +72,21 @@ class Search extends React.Component {
           <input type="submit" value="Submit" />
         </form>
 
-        {this.state.pods.length > 0 && <h4>Found pods</h4>}
-        {this.state.pods.map(pod => (
+        {this.props.pods.length > 0 && <h4>Found pods</h4>}
+        {this.props.pods.map(pod => (
           <a key={pod.metadata.uid}
-            className={`button ${this.state.selectedPod !== pod.metadata.uid ? 'button-outline' : ''}`}
+            className={`button ${this.props.selectedPod !== pod.metadata.uid ? 'button-outline' : ''}`}
             onClick={() => this.handlePodClick(pod)}>
             {pod.metadata.name}
           </a>
         ))}
 
-        {this.state.containers.length > 0 &&
+        {this.props.containers.length > 0 &&
           <div className="container-select">
             <i><CornerDownRight size={28} /></i>
-            {this.state.containers.map(container => (
+            {this.props.containers.map(container => (
               <a key={container.containerID}
-                className={`button ${this.state.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
+                className={`button ${this.props.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
                 onClick={() => this.handleContainerClick(container.containerID)}>
                 {container.name}
               </a>

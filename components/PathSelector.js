@@ -9,7 +9,6 @@ class PathSelector extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      index: this.props.index,
       isSelected: this.checkIsSelected(),
     }
 
