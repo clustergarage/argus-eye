@@ -1,5 +1,5 @@
 import React from 'react'
-import {connect, Provider} from 'react-redux'
+import {connect} from 'react-redux'
 import {CornerDownRight} from 'react-feather'
 
 import {mapState, mapDispatch} from '../reducers/search'
@@ -29,6 +29,8 @@ class Search extends React.Component {
   async handleLabelSelectorSubmit(event) {
     event.preventDefault()
     this.props.dispatchSetLabelSelector(this.state.labelSelector)
+    // bubble up labelSelector state so we can inform objectConfig
+    this.props.onSelectorSubmit && this.props.onSelectorSubmit(this.state.labelSelector)
 
     const pods = await searchPods(this.state.labelSelector)
     this.setState({pods})
@@ -42,8 +44,6 @@ class Search extends React.Component {
           }, {})
       }
     }))
-    // bubble up labelSelector state so we can inform objectConfig
-    this.props.onSelectorSubmit && this.props.onSelectorSubmit(this.state.labelSelector)
   }
 
   async handlePodClick(pod) {

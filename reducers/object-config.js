@@ -6,7 +6,19 @@ const initialState = {
   selector: {
     matchLabels: {}
   },
-  subjects: [],
+  subjects: [
+    /**
+     * paths: []
+     * events: []
+     * ignore: []
+     * recursive: bool
+     * maxDepth: int
+     * onlyDir: bool
+     * followMove: bool
+     * tags: object
+     */
+  ],
+  //logFormat: string
 }
 
 const reducer = (state = initialState, action) => {
@@ -16,16 +28,21 @@ const reducer = (state = initialState, action) => {
       newState.subjects = [...newState.subjects, {}]
       break
     case SET_SELECTOR:
-      let selection = {}
-      action.selector.replace(/([^=\,]+)=([^\,]*)/g, (_, k, v) => selection[k] = v)
-      newState.selector.matchLabels = selection
+      let labels = {}
+      action.selector.replace(/([^=\,]+)=([^\,]*)/g, (_, k, v) => labels[k] = v)
+      newState.selector.matchLabels = labels
       break
     case TOGGLE_SUBJECT_PATH:
+      let paths = (newState.subjects[action.index] && newState.subjects[action.index].paths) || []
+      var index = paths && paths.indexOf(action.path);
+      if (index > -1) {
+        paths.splice(index, 1);
+      } else {
+        paths.push(action.path);
+      }
       newState.subjects = [
         ...newState.subjects.slice(0, action.index),
-        newState.subjects[action.index] = Object.assign({}, newState.subjects[action.index], {
-          [action.path]: !newState.subjects[action.index][action.path],
-        }),
+        newState.subjects[action.index] = Object.assign({}, newState.subjects[action.index], {paths}),
         ...newState.subjects.slice(action.index + 1),
       ]
       break

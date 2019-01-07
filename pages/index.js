@@ -20,6 +20,7 @@ class Index extends React.Component {
     this.state = {
       directory: this.props.directory || '',
       subjects: this.props.subjects || [],
+      selectedSubject: this.props.selectedSubject,
     }
 
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
@@ -34,10 +35,12 @@ class Index extends React.Component {
     this.setState({directory})
     this.props.dispatchSetRootDirectory(cid, directory)
 
-    if (!this.state.subject) {
+    if (!this.state.selectedSubject) {
       // @TODO: make this a user action
       this.props.dispatchCreateSubject()
-      this.setState({subject: this.props.subjects.slice(-1)})
+      const index = this.props.subjects.length - 1
+      this.setState({selectedSubject: index})
+      this.props.dispatchSelectSubject(index)
     }
   }
 
@@ -49,7 +52,7 @@ class Index extends React.Component {
           <i><Eye size={48} /></i>
         </h1>
 
-        <Search onSubmit={this.onSubmit}
+        <Search onSelectorSubmit={this.onSelectorSubmit}
           onLoadRootDirectory={this.onLoadRootDirectory} />
 
         <div className="file-viewer">
@@ -58,7 +61,8 @@ class Index extends React.Component {
               File Viewer&nbsp;
               <small>(PID: {this.state.directory.split('/')[2]})</small>
             </h2>}
-          <FileTree directory={this.state.directory} />
+            <FileTree directory={this.state.directory}
+              subject={this.state.selectedSubject} />
         </div>
 
         <style jsx>{`

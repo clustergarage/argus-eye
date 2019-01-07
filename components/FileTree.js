@@ -1,5 +1,5 @@
 import React from 'react'
-import {connect, Provider} from 'react-redux'
+import {connect} from 'react-redux'
 import {
   File,
   FileText,
@@ -103,12 +103,14 @@ class FileTree extends React.Component {
       <ul>
         {this.state.files.map(file => {
           return (
-            <li className="file-path" key={file.path}>
-              <PathSelector file={file} />
+            <li key={file.path} className="file-path">
+              <PathSelector index={this.props.subject}
+                file={file} />
               {formatPath(file)}
               {(file.isDirectory && this.props.isVisible[file.path]) &&
                 <FileTree directory={file.path}
                   files={file.files}
+                  subject={this.props.subject}
                   onFileClick={this.props.onFileClick}
                   toggleVisibility={this.props.toggleVisibility}
                   dispatchOpenDirectory={this.props.dispatchOpenDirectory}
