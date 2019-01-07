@@ -68,7 +68,7 @@ app.prepare()
                 isDirectory: stat.isDirectory(),
                 isSymlink: stat.isSymbolicLink(),
                 // source: https://ext4.wiki.kernel.org/index.php/Ext4_Disk_Layout#Special_inodes
-                isDisabled: !!(stat.ino >= 12),
+                isDisabled: !!(stat.ino < 12),
               }
               if (stat.isSymbolicLink()) {
                 res.targetPath = fs.readlinkSync(fullpath)

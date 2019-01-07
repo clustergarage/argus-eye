@@ -9,30 +9,30 @@ class Search extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      selector: this.props.selector || '',
+      labelSelector: this.props.labelSelector || '',
       pods: this.props.pods || [],
       selectedPod: this.props.selectedPod || '',
       containers: this.props.containers || [],
       selectedContainer: this.props.selectedContainer || '',
     }
 
-    this.handleSelectorChange = this.handleSelectorChange.bind(this)
-    this.handleSelectorSubmit = this.handleSelectorSubmit.bind(this)
+    this.handleLabelSelectorChange = this.handleLabelSelectorChange.bind(this)
+    this.handleLabelSelectorSubmit = this.handleLabelSelectorSubmit.bind(this)
     this.handlePodClick = this.handlePodClick.bind(this)
     this.handleContainerClick = this.handleContainerClick.bind(this)
   }
 
-  handleSelectorChange(event) {
-    this.setState({selector: event.target.value})
+  handleLabelSelectorChange(event) {
+    this.setState({labelSelector: event.target.value})
   }
 
-  async handleSelectorSubmit(event) {
+  async handleLabelSelectorSubmit(event) {
     event.preventDefault()
-    this.props.dispatchLoadSelector(this.state.selector)
+    this.props.dispatchSetLabelSelector(this.state.labelSelector)
 
-    const pods = await searchPods(this.state.selector)
+    const pods = await searchPods(this.state.labelSelector)
     this.setState({pods})
-    this.props.dispatchLoadPods(pods.map(pod => {
+    this.props.dispatchSetPods(pods.map(pod => {
       return {
         metadata: Object.keys(pod.metadata)
           .filter(key => ['uid', 'namespace', 'name'].includes(key))
@@ -42,6 +42,8 @@ class Search extends React.Component {
           }, {})
       }
     }))
+    // bubble up labelSelector state so we can inform objectConfig
+    this.props.onSelectorSubmit && this.props.onSelectorSubmit(this.state.labelSelector)
   }
 
   async handlePodClick(pod) {
@@ -50,7 +52,7 @@ class Search extends React.Component {
 
     const containers = await podContainers(namespace, name)
     this.setState({containers})
-    this.props.dispatchLoadContainers(uid, containers.map(container => {
+    this.props.dispatchSetContainers(uid, containers.map(container => {
       return Object.keys(container)
         .filter(key => ['containerID', 'name'].includes(key))
         .reduce((obj, key) => {
@@ -69,12 +71,12 @@ class Search extends React.Component {
   render() {
     return (
       <div>
-        <form onSubmit={this.handleSelectorSubmit}>
+        <form onSubmit={this.handleLabelSelectorSubmit}>
           <label>
             Label selector:
             <input type="text"
-              value={this.state.selector}
-              onChange={this.handleSelectorChange} />
+              value={this.state.labelSelector}
+              onChange={this.handleLabelSelectorChange} />
           </label>
           <input type="submit" value="Submit" />
         </form>

@@ -31,7 +31,7 @@ export const openDirectory = (path, files) => ({type: OPEN_DIRECTORY, path, file
 
 export const mapState = state => ({
   isVisible: state.fileTree.isVisible,
-  openedDirectories: state.fileTree.openedDirectories
+  openedDirectories: state.fileTree.openedDirectories,
 })
 
 export const mapDispatch = dispatch => ({

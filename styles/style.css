@@ -8,3 +8,20 @@ i.disabled svg line {
   color: #9fb3c8;
   /*color: #bcccdc;*/
 }
+
+.file-path i {
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.file-path a {
+  font-size: 1.5rem;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+.file-path a.symlink em {
+  color: #627d98;
+  font-style: normal;
+  vertical-align: inherit;
+}

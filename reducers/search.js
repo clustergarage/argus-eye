@@ -1,10 +1,10 @@
-const LOAD_SELECTOR = 'LOAD_SELECTOR'
-const LOAD_PODS = 'LOAD_PODS'
-const LOAD_CONTAINERS = 'LOAD_CONTAINERS'
-const LOAD_ROOT_DIRECTORY = 'LOAD_ROOT_DIRECTORY'
+const SET_LABEL_SELECTOR = 'SET_LABEL_SELECTOR'
+const SET_PODS = 'SET_PODS'
+const SET_CONTAINERS = 'SET_CONTAINERS'
+const SET_ROOT_DIRECTORY = 'SET_ROOT_DIRECTORY'
 
 const initialState = {
-  selector: '',
+  labelSelector: '',
   pods: [],
   selectedPod: '',
   containers: [],
@@ -15,17 +15,17 @@ const initialState = {
 const reducer = (state = initialState, action) => {
   const newState = Object.assign({}, state)
   switch (action.type) {
-    case LOAD_SELECTOR:
-      newState.selector = action.selector
+    case SET_LABEL_SELECTOR:
+      newState.labelSelector = action.labelSelector
       break
-    case LOAD_PODS:
+    case SET_PODS:
       newState.pods = action.pods
       break
-    case LOAD_CONTAINERS:
+    case SET_CONTAINERS:
       newState.selectedPod = action.uid
       newState.containers = action.containers
       break
-    case LOAD_ROOT_DIRECTORY:
+    case SET_ROOT_DIRECTORY:
       newState.selectedContainer = action.cid
       newState.directory = action.directory
       break
@@ -37,13 +37,13 @@ const reducer = (state = initialState, action) => {
 
 export default reducer
 
-export const loadSelector = selector => ({type: LOAD_SELECTOR, selector})
-export const loadPods = pods => ({type: LOAD_PODS, pods})
-export const loadContainers = (uid, containers) => ({type: LOAD_CONTAINERS, uid, containers})
-export const loadRootDirectory = (cid, directory) => ({type: LOAD_ROOT_DIRECTORY, cid, directory})
+export const setLabelSelector = selector => ({type: SET_LABEL_SELECTOR, selector})
+export const setPods = pods => ({type: SET_PODS, pods})
+export const setContainers = (uid, containers) => ({type: SET_CONTAINERS, uid, containers})
+export const setRootDirectory = (cid, directory) => ({type: SET_ROOT_DIRECTORY, cid, directory})
 
 export const mapState = state => ({
-  selector: state.search.selector,
+  labelSelector: state.search.labelSelector,
   pods: state.search.pods,
   selectedPod: state.search.selectedPod,
   containers: state.search.containers,
@@ -52,8 +52,8 @@ export const mapState = state => ({
 })
 
 export const mapDispatch = dispatch => ({
-  dispatchLoadSelector: selector => dispatch(loadSelector(selector)),
-  dispatchLoadPods: pods => dispatch(loadPods(pods)),
-  dispatchLoadContainers: (uid, containers) => dispatch(loadContainers(uid, containers)),
-  dispatchLoadRootDirectory: (cid, directory) => dispatch(loadRootDirectory(cid, directory)),
+  dispatchSetLabelSelector: selector => dispatch(setLabelSelector(selector)),
+  dispatchSetPods: pods => dispatch(setPods(pods)),
+  dispatchSetContainers: (uid, containers) => dispatch(setContainers(uid, containers)),
+  dispatchSetRootDirectory: (cid, directory) => dispatch(setRootDirectory(cid, directory)),
 })
