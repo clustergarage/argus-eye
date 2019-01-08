@@ -5,23 +5,27 @@
   cursor: pointer;
 }
 
-.file-path i.selected svg polyline {
+.file-path .selected i svg polyline {
   color: #27ab83;
 }
 
-.file-path i.disabled svg line {
+.file-path .disabled i svg line {
   color: #9fb3c8;
   /*color: #bcccdc;*/
 }
+.file-path .disabled a {
+  color: #9fb3c8;
+}
 
 .file-path a {
+  color: #9446ed;
   font-size: 1.5rem;
   vertical-align: top;
   cursor: pointer;
 }
 
 .file-path a.symlink em {
-  color: #627d98;
+  color: #dac4ff;
   font-style: normal;
   vertical-align: inherit;
 }

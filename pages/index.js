@@ -3,8 +3,9 @@ import {connect} from 'react-redux'
 import {Eye} from 'react-feather'
 
 import Layout from '../components/Layout'
-import FileTree from '../components/FileTree'
 import Search from '../components/Search'
+import FileTree from '../components/FileTree'
+import WatcherOptions from '../components/WatcherOptions'
 import {
   mapState as mapSearchState,
   mapDispatch as mapSearchDispatch,
@@ -37,22 +38,37 @@ class Index extends React.Component {
   render() {
     return (
       <Layout>
-        <h1>
-          Argus
-          <i><Eye size={48} /></i>
-        </h1>
+        <div className="container">
+          <div className="row">
+            <h1>
+              Argus
+              <i><Eye size={48} /></i>
+            </h1>
+          </div>
 
-        <Search onSelectorSubmit={this.onSelectorSubmit}
-          onLoadRootDirectory={this.onLoadRootDirectory} />
+          <div className="row">
+            <div className="column">
+              <Search onSelectorSubmit={this.onSelectorSubmit}
+                onLoadRootDirectory={this.onLoadRootDirectory} />
+            </div>
+          </div>
 
-        <div className="file-viewer">
-          {this.props.directory &&
-            <h2>
-              File Viewer&nbsp;
-              <small>(PID: {this.props.directory.split('/')[2]})</small>
-            </h2>}
-            <FileTree directory={this.props.directory}
-              subject={this.props.selectedSubject} />
+          <div className="row tool-container">
+            <div className="column file-viewer">
+              {this.props.directory &&
+                <h2>
+                  File Viewer&nbsp;
+                  <small>(PID: {this.props.directory.split('/')[2]})</small>
+                </h2>}
+                <FileTree directory={this.props.directory}
+                  subject={this.props.selectedSubject} />
+            </div>
+            {this.props.selectedSubject !== null &&
+              <div className="column column-33 watcher-options">
+                <h3>Watcher Options</h3>
+                <WatcherOptions subject={this.props.selectedSubject} />
+              </div>}
+          </div>
         </div>
 
         <style jsx>{`
@@ -61,12 +77,15 @@ class Index extends React.Component {
             margin: 1rem 0 0 1rem;
           }
 
-          .file-viewer {
+          .tool-container {
             margin-top: 4rem;
           }
 
           .file-viewer h2 small {
             font: 1.75rem "Ubuntu Mono", monospace;
+          }
+
+          .watcher-options {
           }
         `}</style>
       </Layout>

@@ -1,12 +1,5 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {
-  File,
-  FileText,
-  Folder,
-  FolderPlus,
-  FolderMinus,
-} from 'react-feather'
 
 import PathSelector from '../components/PathSelector'
 import {mapState, mapDispatch} from '../reducers/file-tree'
@@ -19,7 +12,7 @@ class FileTree extends React.Component {
       files: this.props.files || [],
     }
 
-    this.handleDirectoryClick = this.handleDirectoryClick.bind(this)
+    this.onDirectoryClick = this.onDirectoryClick.bind(this)
     this.onFileClick = this.onFileClick.bind(this)
   }
 
@@ -49,7 +42,7 @@ class FileTree extends React.Component {
     }
   }
 
-  async handleDirectoryClick(file) {
+  async onDirectoryClick(file) {
     this.props.toggleVisibility(file.path)
     if ((this.props.openedDirectories &&
       !this.props.openedDirectories[file.path]) ||
@@ -64,61 +57,27 @@ class FileTree extends React.Component {
   }
 
   render() {
-    const iconSize = 20
-
-    let formatPath = (file) => {
-      if (file.isDisabled) {
-        return (
-          <a>
-            <i>{file.isDirectory ? <Folder size={iconSize} /> :
-              (file.isBinary ? <File size={iconSize} /> : <FileText size={iconSize} />)}</i>
-            {file.name}
-          </a>
-        )
-      } else if (file.isSymlink) {
-        return (
-          <a className="symlink">
-            <i><Folder size={iconSize} /></i>
-            {file.name} <em>-> {file.targetPath}</em>
-          </a>
-        )
-      } else if (file.isDirectory) {
-        return (
-          <a onClick={() => this.handleDirectoryClick(file)}>
-            <i>{this.props.isVisible[file.path] ? <FolderMinus size={iconSize} /> : <FolderPlus size={iconSize} />}</i>
-            {file.name}
-          </a>
-        )
-      }
-      return (
-        <a onClick={() => this.onFileClick(file)}>
-          <i>{file.isBinary ? <File size={iconSize} /> : <FileText size={iconSize} />}</i>
-          {file.name}
-        </a>
-      )
-    }
-
     return (
       this.state.files.length > 0 &&
       <ul>
-        {this.state.files.map(file => {
-          return (
-            <li key={file.path} className="file-path">
-              <PathSelector index={this.props.subject}
-                file={file} />
-              {formatPath(file)}
-              {(file.isDirectory && this.props.isVisible[file.path]) &&
-                <FileTree directory={file.path}
-                  files={file.files}
-                  subject={this.props.subject}
-                  onFileClick={this.props.onFileClick}
-                  toggleVisibility={this.props.toggleVisibility}
-                  dispatchOpenDirectory={this.props.dispatchOpenDirectory}
-                  openedDirectories={this.props.openedDirectories}
-                  isVisible={this.props.isVisible} />}
-            </li>
-          )}
-        )}
+        {this.state.files.map(file => (
+          <li key={file.path} className="file-path">
+            <PathSelector file={file}
+              subject={this.props.subject}
+              onDirectoryClick={this.onDirectoryClick}
+              onFileClick={this.onFileClick}
+              isVisible={this.props.isVisible[file.path]} />
+            {(file.isDirectory && this.props.isVisible[file.path]) &&
+              <FileTree directory={file.path}
+                files={file.files}
+                subject={this.props.subject}
+                onFileClick={this.props.onFileClick}
+                toggleVisibility={this.props.toggleVisibility}
+                dispatchOpenDirectory={this.props.dispatchOpenDirectory}
+                openedDirectories={this.props.openedDirectories}
+                isVisible={this.props.isVisible} />}
+          </li>
+        ))}
 
         <style jsx>{`
           ul {
