@@ -11,6 +11,10 @@ import {
   mapDispatch as mapSearchDispatch,
 } from '../reducers/search'
 import {
+  mapState as mapTreeState,
+  mapDispatch as mapTreeDispatch,
+} from '../reducers/file-tree'
+import {
   mapState as mapConfigState,
   mapDispatch as mapConfigDispatch,
 } from '../reducers/object-config'
@@ -19,12 +23,13 @@ class Index extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      isRecursive: false,
+      isRecursive: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].recursive || false,
     }
 
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
     this.onRecursiveChange = this.onRecursiveChange.bind(this)
+    this.onIgnoreClick = this.onIgnoreClick.bind(this)
   }
 
   onSelectorSubmit(selector) {
@@ -42,6 +47,12 @@ class Index extends React.Component {
   onRecursiveChange(subject) {
     this.props.toggleRecursive(subject)
     this.setState({isRecursive: subject.recursive})
+  }
+
+  onIgnoreClick(path) {
+    if (this.props.isVisible[path]) {
+      this.props.toggleVisibility(path)
+    }
   }
 
   getSelectedSubject() {
@@ -75,7 +86,8 @@ class Index extends React.Component {
                 </h2>}
                 <FileTree directory={this.props.directory}
                   subject={this.getSelectedSubject()} 
-                  recursive={this.state.isRecursive} />
+                  recursive={this.state.isRecursive}
+                  onIgnoreClick={this.onIgnoreClick} />
             </div>
             {this.props.selectedSubject !== null &&
               <div className="column column-33 watcher-options">
@@ -113,10 +125,12 @@ class Index extends React.Component {
 
 const mapState = state => (Object.assign({},
   mapSearchState(state),
+  mapTreeState(state),
   mapConfigState(state)))
 
 const mapDispatch = dispatch => (Object.assign({},
   mapSearchDispatch(dispatch),
+  mapTreeDispatch(dispatch),
   mapConfigDispatch(dispatch)))
 
 export default connect(mapState, mapDispatch)(Index)

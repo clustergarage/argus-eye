@@ -1,13 +1,15 @@
 import React from 'react'
 import {connect} from 'react-redux'
 import {
+  CheckSquare,
   File,
   FileText,
   Folder,
   FolderPlus,
   FolderMinus,
+  MinusCircle,
   Square,
-  CheckSquare,
+  XCircle,
   XSquare,
 } from 'react-feather'
 
@@ -19,15 +21,23 @@ class PathSelector extends React.Component {
     super(props)
 
     this.handleCheckboxClick = this.handleCheckboxClick.bind(this)
+    this.handleIgnoreClick = this.handleIgnoreClick.bind(this)
+    this.onDirectoryClick = this.onDirectoryClick.bind(this)
+    this.onFileClick = this.onFileClick.bind(this)
   }
 
-  checkIsSelected() {
+  isSelected() {
+    return this.isDirectlySelected() ||
+      this.isRecursivelySelected()
+  }
+
+  isDirectlySelected() {
+    return (this.props.subject.paths || [])
+      .indexOf(formatPath(this.props.file.path)) > -1
+  }
+
+  isRecursivelySelected() {
     const path = formatPath(this.props.file.path)
-    // check if path is directly in subject paths list
-    if ((this.props.subject.paths || []).indexOf(path) > -1) {
-      return true
-    }
-    // check if parent directory is in subject paths list and recursive=true
     if (this.props.recursive) {
       let i = 0, len = this.props.subject.paths.length
       for (; i < len; ++i) {
@@ -43,22 +53,59 @@ class PathSelector extends React.Component {
     return false
   }
 
+  isIgnored() {
+    return (this.props.subject.ignore || [])
+      .indexOf(this.props.file.name) > -1
+  }
+
   handleCheckboxClick() {
-    if (this.props.file.isDisabled) {
+    if (this.props.file.isDisabled ||
+      // ignore if recursively selected
+      this.isRecursivelySelected()) {
       return
     }
     this.props.toggleSubjectPath(this.props.subject, formatPath(this.props.file.path))
   }
 
+  handleIgnoreClick() {
+    this.props.toggleSubjectIgnore(this.props.subject, this.props.file.name)
+    this.props.onIgnoreClick && this.props.onIgnoreClick(this.props.file.path)
+  }
+
+  onDirectoryClick() {
+    if (this.isIgnored()) {
+      return
+    }
+    this.props.onDirectoryClick && this.props.onDirectoryClick(this.props.file)
+  }
+
+  onFileClick() {
+    this.props.onFileClick && this.props.onFileClick(this.props.file)
+  }
+
   render() {
     const iconSize = 20
-    const Icon = this.props.file.isDisabled ? XSquare
-      : (this.checkIsSelected() ? CheckSquare : Square)
+    let Icon
+    if (this.props.file.isDisabled ||
+      this.isIgnored()) {
+      Icon = XSquare
+    } else if (this.isDirectlySelected()) {
+      Icon = CheckSquare
+    } else if (this.isRecursivelySelected()) {
+      Icon = CheckSquare
+    } else {
+      Icon = Square
+    }
+    let IgnoreIcon = this.isIgnored() ? XCircle : MinusCircle
 
     let classes = []
-    if (this.checkIsSelected()) {
+    if (this.isSelected()) {
       classes.push('selected')
     }
+    if (this.isIgnored()) {
+      classes.push('ignored')
+    }
+
     if (this.props.file.isDisabled) {
       classes.push('disabled')
     } else if (this.props.file.isSymlink) {
@@ -83,14 +130,14 @@ class PathSelector extends React.Component {
         )
       } else if (this.props.file.isDirectory) {
         return (
-          <a onClick={() => this.props.onDirectoryClick && this.props.onDirectoryClick(this.props.file)}>
+          <a onClick={this.onDirectoryClick}>
             <i>{this.props.isVisible ? <FolderMinus size={iconSize} /> : <FolderPlus size={iconSize} />}</i>
             {this.props.file.name}
           </a>
         )
       }
       return (
-        <a onClick={() => this.props.onFileClick && this.props.onFileClick(this.props.file)}>
+        <a onClick={this.onFileClick}>
           <i>{this.props.file.isBinary ? <File size={iconSize} /> : <FileText size={iconSize} />}</i>
           {this.props.file.name}
         </a>
@@ -99,6 +146,11 @@ class PathSelector extends React.Component {
 
     return (
       <div className={classes.join(' ')}>
+        {this.isRecursivelySelected() &&
+          <i className={`ignore ${this.isIgnored() ? 'selected' : ''}`}
+            onClick={this.handleIgnoreClick}>
+            <IgnoreIcon size={iconSize} />
+          </i>}
         <i className="check" onClick={this.handleCheckboxClick}>
           <Icon size={iconSize} />
         </i>

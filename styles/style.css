@@ -9,12 +9,17 @@
   color: #27ab83;
 }
 
-.file-path .disabled i.check svg line {
+.file-path .disabled i.check svg line,
+.file-path .ignored i.check svg line,
+.file-path .ignored i.ignore svg line {
   color: #9fb3c8;
-  /*color: #bcccdc;*/
 }
 .file-path .disabled a {
   color: #9fb3c8;
+}
+.file-path .ignored a {
+  text-decoration-line: line-through;
+  text-decoration-color: #486581;
 }
 
 .file-path a {
