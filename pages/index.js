@@ -18,9 +18,13 @@ import {
 class Index extends React.Component {
   constructor(props) {
     super(props)
+    this.state = {
+      isRecursive: false,
+    }
 
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
+    this.onRecursiveChange = this.onRecursiveChange.bind(this)
   }
 
   onSelectorSubmit(selector) {
@@ -33,6 +37,15 @@ class Index extends React.Component {
     // @TODO: make this a user action
     this.props.dispatchCreateSubject()
     this.props.dispatchSelectSubject(this.props.subjects.length - 1)
+  }
+
+  onRecursiveChange(subject) {
+    this.props.toggleRecursive(subject)
+    this.setState({isRecursive: subject.recursive})
+  }
+
+  getSelectedSubject() {
+    return this.props.subjects[this.props.selectedSubject]
   }
 
   render() {
@@ -61,12 +74,15 @@ class Index extends React.Component {
                   <small>(PID: {this.props.directory.split('/')[2]})</small>
                 </h2>}
                 <FileTree directory={this.props.directory}
-                  subject={this.props.selectedSubject} />
+                  subject={this.getSelectedSubject()} 
+                  recursive={this.state.isRecursive} />
             </div>
             {this.props.selectedSubject !== null &&
               <div className="column column-33 watcher-options">
                 <h3>Watcher Options</h3>
-                <WatcherOptions subject={this.props.selectedSubject} />
+                <WatcherOptions subject={this.getSelectedSubject()}
+                  recursive={this.state.isRecursive}
+                  onRecursiveChange={this.onRecursiveChange} />
               </div>}
           </div>
         </div>

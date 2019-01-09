@@ -9,19 +9,17 @@ class WatcherOptions extends React.Component {
     super(props)
     this.state = {
       events: this.props.events || [],
-      recursive: this.props.subjects[this.props.subject] && this.props.subjects[this.props.subject].recursive || false,
     }
 
     this.handleEventChange = this.handleEventChange.bind(this)
-    this.handleRecursiveChange = this.handleRecursiveChange.bind(this)
+    this.onRecursiveChange = this.onRecursiveChange.bind(this)
   }
 
   handleEventChange(event) {
   }
 
-  handleRecursiveChange(event) {
-    this.setState({recursive: !this.state.recursive})
-    this.props.toggleRecursive(this.props.subject)
+  onRecursiveChange(subject) {
+    this.props.onRecursiveChange && this.props.onRecursiveChange(this.props.subject)
   }
 
   render() {
@@ -38,13 +36,11 @@ class WatcherOptions extends React.Component {
     ]
 
     const getSelectedPaths = () => {
-      return this.props.subjects[this.props.subject] &&
-        this.props.subjects[this.props.subject].paths || []
+      return this.props.subject.paths || []
     }
 
     const getIgnoredPaths = () => {
-      return this.props.subjects[this.props.subject] &&
-        this.props.subjects[this.props.subject].ignore || []
+      return this.props.subject.ignore || []
     }
 
     return (
@@ -84,10 +80,10 @@ class WatcherOptions extends React.Component {
 
           <label>
             <input type="checkbox"
-              checked={this.state.recursive}
-              onChange={this.handleRecursiveChange} />
+              checked={this.props.recursive}
+              onChange={this.onRecursiveChange} />
             Recursive
-            {this.state.recursive && (
+            {this.props.recursive && (
               <div className="recursive">
                 <label>
                   Ignored paths&nbsp;
@@ -173,6 +169,7 @@ class WatcherOptions extends React.Component {
         ul.ignored li {
           list-style: none;
           font: 1.2rem "Ubuntu Mono", monospace;
+          overflow-wrap: break-word;
         }
 
         ul.paths li i,

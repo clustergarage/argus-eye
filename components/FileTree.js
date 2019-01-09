@@ -64,6 +64,7 @@ class FileTree extends React.Component {
           <li key={file.path} className="file-path">
             <PathSelector file={file}
               subject={this.props.subject}
+              recursive={this.props.recursive}
               onDirectoryClick={this.onDirectoryClick}
               onFileClick={this.onFileClick}
               isVisible={this.props.isVisible[file.path]} />
@@ -71,6 +72,7 @@ class FileTree extends React.Component {
               <FileTree directory={file.path}
                 files={file.files}
                 subject={this.props.subject}
+                recursive={this.props.recursive}
                 onFileClick={this.props.onFileClick}
                 toggleVisibility={this.props.toggleVisibility}
                 dispatchOpenDirectory={this.props.dispatchOpenDirectory}

@@ -12,9 +12,14 @@ const initialState = {
 
 const reducer = (state = initialState, action) => {
   const newState = Object.assign({}, state)
+  let index
+
   switch (action.type) {
     case CREATE_SUBJECT:
-      newState.subjects = [...newState.subjects, {}]
+      newState.subjects = [...newState.subjects, {
+        paths: [],
+        events: [],
+      }]
       break
     case SET_SELECTOR:
       let labels = {}
@@ -22,21 +27,23 @@ const reducer = (state = initialState, action) => {
       newState.selector.matchLabels = labels
       break
     case TOGGLE_SUBJECT_PATH:
-      let paths = (newState.subjects[action.index] && newState.subjects[action.index].paths) || []
-      const index = paths && paths.indexOf(action.path)
-      if (index > -1) {
-        paths.splice(index, 1)
+      index = newState.subjects.indexOf(action.subject)
+      let paths = (newState.subjects[index] && newState.subjects[index].paths) || []
+      let pindex = paths && paths.indexOf(action.path)
+      if (pindex > -1) {
+        paths.splice(pindex, 1)
       } else {
         paths.push(action.path)
       }
       newState.subjects = [
-        ...newState.subjects.slice(0, action.index),
-        newState.subjects[action.index] = Object.assign({}, newState.subjects[action.index], {paths}),
-        ...newState.subjects.slice(action.index + 1),
+        ...newState.subjects.slice(0, index),
+        newState.subjects[index] = Object.assign({}, newState.subjects[index], {paths}),
+        ...newState.subjects.slice(index + 1),
       ]
       break
     case TOGGLE_RECURSIVE:
-      newState.subjects[action.index].recursive = !newState.subjects[action.index].recursive
+      index = newState.subjects.indexOf(action.subject)
+      newState.subjects[index].recursive = !newState.subjects[index].recursive
       break
     default:
       return state
@@ -48,8 +55,8 @@ export default reducer
 
 export const createSubject = () => ({type: CREATE_SUBJECT})
 export const setSelector = selector => ({type: SET_SELECTOR, selector})
-export const toggleSubjectPath = (index, path) => ({type: TOGGLE_SUBJECT_PATH, index, path})
-export const toggleRecursive = index => ({type: TOGGLE_RECURSIVE, index})
+export const toggleSubjectPath = (subject, path) => ({type: TOGGLE_SUBJECT_PATH, subject, path})
+export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject})
 
 export const mapState = state => ({
   selector: state.objectConfig.selector,
@@ -59,6 +66,6 @@ export const mapState = state => ({
 export const mapDispatch = dispatch => ({
   dispatchCreateSubject: () => dispatch(createSubject()),
   dispatchSetSelector: selector => dispatch(setSelector(selector)),
-  toggleSubjectPath: (index, path) => dispatch(toggleSubjectPath(index, path)),
+  toggleSubjectPath: (subject, path) => dispatch(toggleSubjectPath(subject, path)),
   toggleRecursive: index => dispatch(toggleRecursive(index)),
 })

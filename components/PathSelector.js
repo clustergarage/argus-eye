@@ -17,23 +17,30 @@ import {formatPath} from '../util/util'
 class PathSelector extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      isSelected: this.checkIsSelected(),
-    }
 
     this.handleCheckboxClick = this.handleCheckboxClick.bind(this)
   }
 
-  componentDidUpdate({subject}) {
-    if (this.props.subject && this.props.subject !== subject) {
-      this.setState({isSelected: this.checkIsSelected()})
-    }
-  }
-
   checkIsSelected() {
-    return (this.props.subjects[this.props.subject] &&
-      this.props.subjects[this.props.subject].paths || [])
-        .indexOf(formatPath(this.props.file.path)) > -1
+    const path = formatPath(this.props.file.path)
+    // check if path is directly in subject paths list
+    if ((this.props.subject.paths || []).indexOf(path) > -1) {
+      return true
+    }
+    // check if parent directory is in subject paths list and recursive=true
+    if (this.props.recursive) {
+      let i = 0, len = this.props.subject.paths.length
+      for (; i < len; ++i) {
+        let fp = path.split('/')
+        do {
+          fp.pop()
+          if (fp.join('/') === this.props.subject.paths[i]) {
+            return true
+          }
+        } while (fp.join('/') !== '')
+      }
+    }
+    return false
   }
 
   handleCheckboxClick() {
@@ -41,16 +48,15 @@ class PathSelector extends React.Component {
       return
     }
     this.props.toggleSubjectPath(this.props.subject, formatPath(this.props.file.path))
-    this.setState({isSelected: !this.state.isSelected})
   }
 
   render() {
     const iconSize = 20
     const Icon = this.props.file.isDisabled ? XSquare
-      : (this.state.isSelected ? CheckSquare : Square)
+      : (this.checkIsSelected() ? CheckSquare : Square)
 
     let classes = []
-    if (this.state.isSelected) {
+    if (this.checkIsSelected()) {
       classes.push('selected')
     }
     if (this.props.file.isDisabled) {
@@ -93,7 +99,7 @@ class PathSelector extends React.Component {
 
     return (
       <div className={classes.join(' ')}>
-        <i onClick={this.handleCheckboxClick}>
+        <i className="check" onClick={this.handleCheckboxClick}>
           <Icon size={iconSize} />
         </i>
         {getPath()}

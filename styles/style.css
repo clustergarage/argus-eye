@@ -5,11 +5,11 @@
   cursor: pointer;
 }
 
-.file-path .selected i svg polyline {
+.file-path .selected i.check svg polyline {
   color: #27ab83;
 }
 
-.file-path .disabled i svg line {
+.file-path .disabled i.check svg line {
   color: #9fb3c8;
   /*color: #bcccdc;*/
 }
