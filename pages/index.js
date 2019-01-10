@@ -73,7 +73,7 @@ class Index extends React.Component {
           <div className="row">
             <h1>
               Argus
-              <i><Eye size={48} /></i>
+              <i className="logo"><Eye size={48} /></i>
             </h1>
           </div>
 

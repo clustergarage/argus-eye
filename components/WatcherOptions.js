@@ -8,9 +8,10 @@ class WatcherOptions extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      events: this.props.events || [],
+      events: this.props.subject.events || [],
       onlyDir: this.props.subject.onlyDir || false,
       followMove: this.props.subject.followMove || false,
+      tags: this.props.tags || '',
     }
 
     this.handleEventChange = this.handleEventChange.bind(this)
@@ -18,9 +19,12 @@ class WatcherOptions extends React.Component {
     this.handleMaxDepthChange = this.handleMaxDepthChange.bind(this)
     this.handleOnlyDirChange = this.handleOnlyDirChange.bind(this)
     this.handleFollowMoveChange = this.handleFollowMoveChange.bind(this)
+    this.handleTagsChange = this.handleTagsChange.bind(this)
   }
 
   handleEventChange(event) {
+    this.props.toggleEvent(this.props.subject, event)
+    this.setState({events: this.props.subject.events})
   }
 
   handleRecursiveChange(event) {
@@ -39,6 +43,28 @@ class WatcherOptions extends React.Component {
   handleFollowMoveChange(event) {
     this.setState({followMove: !this.state.followMove})
     this.props.toggleFollowMove(this.props.subject)
+  }
+
+  handleTagsChange(event) {
+    const tagsToObject = tags => {
+      const arr = tags.split(',')
+      let i = 0, len = arr.length
+      let obj = {}
+      for (; i < len; ++i) {
+        let [key, value] = arr[i].split('=')
+        if (key && value) {
+          obj[key] = value
+        }
+      }
+      return obj
+    }
+
+    const oldTags = tagsToObject(this.state.tags)
+    const newTags = tagsToObject(event.target.value)
+    this.setState({tags: event.target.value})
+    if (JSON.stringify(oldTags) !== JSON.stringify(newTags)) {
+      this.props.dispatchSetTags(this.props.subject, newTags)
+    }
   }
 
   render() {
@@ -72,11 +98,9 @@ class WatcherOptions extends React.Component {
               <span key={event}>
                 <button type="button"
                   className={`button button-small ${this.state.events.indexOf(event) === -1 ? 'button-outline' : ''}`}
-                  onClick={this.handleEventChange}>
+                  onClick={() => this.handleEventChange(event)}>
                   {event}{['close', 'move', 'all'].indexOf(event) > -1 ? ' *' : ''}
                 </button>
-                <input type="hidden"
-                  value={this.state.events} />
               </span>
             ))}
             </div>
@@ -88,14 +112,11 @@ class WatcherOptions extends React.Component {
             <small>(<em>{getSelectedPaths().length}</em> selected)</small>
             {getSelectedPaths().length > 0 &&
             <ul className="paths">
-              {getSelectedPaths()
-                .sort()
-                .map((path, index) => (
-                <li key={index}>
-                  <i><Plus size="14" /></i>
-                  {path}
-                </li>
-              ))}
+              {getSelectedPaths().sort().map((path, index) => (
+              <li key={index}>
+                <i><Plus size="14" /></i>
+                {path}
+              </li>))}
             </ul>}
           </label>
 
@@ -111,14 +132,11 @@ class WatcherOptions extends React.Component {
                 <small>(<em>{getIgnoredPaths().length}</em> selected)</small>
                 {getIgnoredPaths().length > 0 &&
                 <ul className="ignored">
-                  {getIgnoredPaths()
-                    .sort()
-                    .map((path, index) => (
-                    <li key={index}>
-                      <i><Minus size="14" /></i>
-                      {path}
-                    </li>
-                  ))}
+                  {getIgnoredPaths().sort().map((path, index) => (
+                  <li key={index}>
+                    <i><Minus size="14" /></i>
+                    {path}
+                  </li>))}
                 </ul>}
               </label>
 
@@ -150,7 +168,7 @@ class WatcherOptions extends React.Component {
             <small>(comma-separated <em>key=value</em> pairs)</small><br />
             <small>(e.g. <em>app=foo,env=dev</em>)</small>
             <input type="text"
-              value={this.props.tags}
+              value={this.state.tags}
               onChange={this.handleTagsChange} />
           </label>
         </form>
