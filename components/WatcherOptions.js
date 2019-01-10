@@ -1,6 +1,14 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {CornerDownRight, Plus, Minus} from 'react-feather'
+import {
+  Activity,
+  ChevronDown,
+  ChevronRight,
+  CornerDownRight,
+  Info,
+  Plus,
+  Minus,
+} from 'react-feather'
 
 import {mapState, mapDispatch} from '../reducers/object-config'
 
@@ -12,6 +20,8 @@ class WatcherOptions extends React.Component {
       onlyDir: this.props.subject.onlyDir || false,
       followMove: this.props.subject.followMove || false,
       tags: this.props.tags || '',
+      logFormat: this.props.logFormat || '',
+      showSpecifiers: false,
     }
 
     this.handleEventChange = this.handleEventChange.bind(this)
@@ -20,6 +30,9 @@ class WatcherOptions extends React.Component {
     this.handleOnlyDirChange = this.handleOnlyDirChange.bind(this)
     this.handleFollowMoveChange = this.handleFollowMoveChange.bind(this)
     this.handleTagsChange = this.handleTagsChange.bind(this)
+    this.handleLogFormatChange = this.handleLogFormatChange.bind(this)
+    this.toggleSpecifiers = this.toggleSpecifiers.bind(this)
+    this.insertSpecifier = this.insertSpecifier.bind(this)
   }
 
   handleEventChange(event) {
@@ -67,6 +80,27 @@ class WatcherOptions extends React.Component {
     }
   }
 
+  handleLogFormatChange(event) {
+    this.setState({logFormat: event.target.value})
+    this.props.dispatchSetLogFormat(event.target.value)
+  }
+
+  toggleSpecifiers() {
+    this.setState({showSpecifiers: !this.state.showSpecifiers})
+  }
+
+  insertSpecifier(specifier) {
+    const selection = this.logFormatInput.selectionStart
+    const value = this.state.logFormat.slice(0, selection) +
+      `{${specifier.name}}` +
+      this.state.logFormat.slice(this.logFormatInput.selectionEnd)
+    this.setState({logFormat: value}, ()=> {
+      const newSelection = selection + specifier.name.length + 2
+      this.logFormatInput.selectionStart = this.logFormatInput.selectionEnd = newSelection
+      this.props.dispatchSetLogFormat(value)
+    })
+  }
+
   render() {
     const events = [
       'access',
@@ -77,7 +111,17 @@ class WatcherOptions extends React.Component {
       'modify',
       'moveself', 'movedfrom', 'movedto', 'move',
       'open',
-      'all'
+      'all',
+    ]
+    const specifiers = [
+      { name: 'pod', description: 'name of the pod' },
+      { name: 'node', description: 'name of the node' },
+      { name: 'event', description: 'inotify event that was observed' },
+      { name: 'path', description: 'name of the directory path' },
+      { name: 'file', description: 'name of the file' },
+      { name: 'ftype', description: 'evaluates to "file" or "directory"' },
+      { name: 'tags', description: 'list of custom tags in key=value comma-separated list' },
+      { name: 'sep', description: 'placeholder for a "/" character to include (e.g. between the path/file specifiers)' },
     ]
 
     const getSelectedPaths = () => {
@@ -88,6 +132,24 @@ class WatcherOptions extends React.Component {
       return this.props.subject.ignore || []
     }
 
+    const iconSize = 14
+
+    const defaultLogFormat = `{event} {ftype} '{path}{sep}{file}' ({pod}:{node}) {tags}`
+    const formatLiveExample = () => {
+      const format = require('string-format')
+      const example = {
+        pod: 'foo-1-pod',
+        node: 'barnode',
+        event: 'MODIFY',
+        path: '/path/to',
+        file: 'file.ext',
+        ftype: 'file',
+        tags: 'foo=bar',
+        sep: '\/',
+      }
+      return format(this.state.logFormat || defaultLogFormat, example)
+    }
+
     return (
       <div>
         <form>
@@ -95,14 +157,13 @@ class WatcherOptions extends React.Component {
             Events<br />
             <div>
             {events.map(event => (
-              <span key={event}>
-                <button type="button"
-                  className={`button button-small ${this.state.events.indexOf(event) === -1 ? 'button-outline' : ''}`}
-                  onClick={() => this.handleEventChange(event)}>
-                  {event}{['close', 'move', 'all'].indexOf(event) > -1 ? ' *' : ''}
-                </button>
-              </span>
-            ))}
+            <span key={event}>
+              <button type="button"
+                className={`button button-small ${this.state.events.indexOf(event) === -1 ? 'button-outline' : ''}`}
+                onClick={() => this.handleEventChange(event)}>
+                {event}{['close', 'move', 'all'].indexOf(event) > -1 ? ' *' : ''}
+              </button>
+            </span>))}
             </div>
             <small><em>*</em> denotes a combined event</small>
           </label>
@@ -114,7 +175,7 @@ class WatcherOptions extends React.Component {
             <ul className="paths">
               {getSelectedPaths().sort().map((path, index) => (
               <li key={index}>
-                <i><Plus size="14" /></i>
+                <i><Plus size={iconSize} /></i>
                 {path}
               </li>))}
             </ul>}
@@ -134,7 +195,7 @@ class WatcherOptions extends React.Component {
                 <ul className="ignored">
                   {getIgnoredPaths().sort().map((path, index) => (
                   <li key={index}>
-                    <i><Minus size="14" /></i>
+                    <i><Minus size={iconSize} /></i>
                     {path}
                   </li>))}
                 </ul>}
@@ -170,6 +231,58 @@ class WatcherOptions extends React.Component {
             <input type="text"
               value={this.state.tags}
               onChange={this.handleTagsChange} />
+          </label>
+
+          <label className="log-format">
+            Custom log format<br />
+            <input type="text"
+              value={this.state.logFormat}
+              ref={input => this.logFormatInput = input}
+              onChange={this.handleLogFormatChange}
+              placeholder={defaultLogFormat} />
+            <div className="live-example">
+              <small>
+                <div>
+                  <i><Activity size={iconSize} /></i>
+                  live example:
+                </div>
+                <em>{formatLiveExample()}</em>
+              </small>
+            </div>
+            <div className="specifiers">
+              <small>
+                <a onClick={this.toggleSpecifiers}>
+                  <i>{this.state.showSpecifiers ? <ChevronDown size={iconSize} /> : <ChevronRight size={iconSize} />}</i>
+                  show possible specifiers
+                </a>
+                {this.state.showSpecifiers &&
+                <div>
+                  <div className="help">
+                    <i><Info size={iconSize} /></i>
+                    click specifier <em>name</em> to add it to custom log format
+                  </div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>name</th>
+                        <th>description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {specifiers.map(specifier => (
+                      <tr key={specifier.name}>
+                        <td>
+                          <a onClick={() => this.insertSpecifier(specifier)}>
+                            {specifier.name}
+                          </a>
+                        </td>
+                        <td>{specifier.description}</td>
+                      </tr>))}
+                    </tbody>
+                  </table>
+                </div>}
+              </small>
+            </div>
           </label>
         </form>
 
@@ -220,6 +333,45 @@ class WatcherOptions extends React.Component {
 
         .recursive {
           padding: 0.5rem 0 0.5rem 3rem;
+        }
+
+        .log-format {
+          border-top: 2px solid #d9e2ec;
+          margin-top: 1.5rem;
+          padding-top: 2rem;
+        }
+
+        .log-format input[type="text"]::placeholder {
+          color: #bcccdc;
+          font-style: italic;
+        }
+
+        .log-format .live-example em {
+          display: inline-block;
+          word-break: break-all;
+          margin: 1rem 0;
+        }
+
+        .log-format .specifiers {
+          margin-top: 0.5rem;
+        }
+
+        .log-format .specifiers .help {
+          margin: 1rem 0 0.5rem;
+        }
+
+        .log-format .specifiers a {
+          cursor: pointer;
+        }
+
+        .log-format .specifiers table {
+          margin-bottom: 1.5rem;
+        }
+
+        .log-format .live-example i,
+        .log-format .specifiers i {
+          vertical-align: sub;
+          margin-right: 0.5rem;
         }
         `}</style>
       </div>

@@ -8,6 +8,7 @@ const TOGGLE_ONLY_DIR = 'TOGGLE_ONLY_DIR'
 const TOGGLE_FOLLOW_MOVE = 'TOGGLE_FOLLOW_MOVE'
 const SET_MAX_DEPTH = 'SET_MAX_DEPTH'
 const SET_TAGS = 'SET_TAGS'
+const SET_LOG_FORMAT = 'SET_LOG_FORMAT'
 
 const initialState = {
   selector: {
@@ -59,6 +60,9 @@ const reducer = (state = initialState, action) => {
     case SET_TAGS:
       newState.subjects[index][action.key] = action.value
       break
+    case SET_LOG_FORMAT:
+      newState.logFormat = action.value
+      break
     default:
       return state
   }
@@ -93,10 +97,12 @@ export const toggleOnlyDir = subject => ({type: TOGGLE_ONLY_DIR, subject, key: '
 export const toggleFollowMove = subject => ({type: TOGGLE_FOLLOW_MOVE, subject, key: 'followMove'})
 export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, key: 'maxDepth', value})
 export const setTags = (subject, value) => ({type: SET_TAGS, subject, key: 'tags', value})
+export const setLogFormat = value => ({type: SET_LOG_FORMAT, value})
 
 export const mapState = state => ({
   selector: state.objectConfig.selector,
   subjects: state.objectConfig.subjects,
+  logFormat: state.objectConfig.logFormat,
 })
 
 export const mapDispatch = dispatch => ({
@@ -110,4 +116,5 @@ export const mapDispatch = dispatch => ({
   toggleFollowMove: subject => dispatch(toggleFollowMove(subject)),
   dispatchSetMaxDepth: (subject, value) => dispatch(setMaxDepth(subject, value)),
   dispatchSetTags: (subject, value) => dispatch(setTags(subject, value)),
+  dispatchSetLogFormat: value => dispatch(setLogFormat(value)),
 })

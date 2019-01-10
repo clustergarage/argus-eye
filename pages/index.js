@@ -92,7 +92,7 @@ class Index extends React.Component {
                 <small>(PID: {this.props.directory.split('/')[2]})</small>
               </h2>}
               <FileTree directory={this.props.directory}
-                subject={this.getSelectedSubject()} 
+                subject={this.getSelectedSubject()}
                 recursive={this.state.isRecursive}
                 maxDepth={this.state.maxDepth}
                 onIgnoreClick={this.onIgnoreClick} />
