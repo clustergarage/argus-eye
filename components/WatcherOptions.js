@@ -9,11 +9,14 @@ class WatcherOptions extends React.Component {
     super(props)
     this.state = {
       events: this.props.events || [],
+      followMove: this.props.subject.followMove || false,
     }
 
     this.handleEventChange = this.handleEventChange.bind(this)
     this.handleRecursiveChange = this.handleRecursiveChange.bind(this)
     this.handleMaxDepthChange = this.handleMaxDepthChange.bind(this)
+    this.handleOnlyDirChange = this.handleOnlyDirChange.bind(this)
+    this.handleFollowMoveChange = this.handleFollowMoveChange.bind(this)
   }
 
   handleEventChange(event) {
@@ -25,6 +28,15 @@ class WatcherOptions extends React.Component {
 
   handleMaxDepthChange(event) {
     this.props.onMaxDepthChange && this.props.onMaxDepthChange(this.props.subject, event.target.value)
+  }
+
+  handleOnlyDirChange(event) {
+    this.props.onOnlyDirChange && this.props.onOnlyDirChange(this.props.subject)
+  }
+
+  handleFollowMoveChange(event) {
+    this.setState({followMove: !this.state.followMove})
+    this.props.toggleFollowMove(this.props.subject)
   }
 
   render() {
@@ -122,7 +134,7 @@ class WatcherOptions extends React.Component {
 
           <label>
             <input type="checkbox"
-              checked={this.props.followMove}
+              checked={this.state.followMove}
               onChange={this.handleFollowMoveChange} />
             Follow move events
           </label>
