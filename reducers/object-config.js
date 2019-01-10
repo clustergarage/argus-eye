@@ -4,6 +4,7 @@ const TOGGLE_SUBJECT_PATH = 'TOGGLE_SUBJECT_PATH'
 const TOGGLE_SUBJECT_IGNORE = 'TOGGLE_SUBJECT_IGNORE'
 const TOGGLE_RECURSIVE = 'TOGGLE_RECURSIVE'
 const SET_MAX_DEPTH = 'SET_MAX_DEPTH'
+const TOGGLE_ONLY_DIR = 'TOGGLE_ONLY_DIR'
 const TOGGLE_FOLLOW_MOVE = 'TOGGLE_FOLLOW_MOVE'
 
 const initialState = {
@@ -55,6 +56,10 @@ const reducer = (state = initialState, action) => {
       index = newState.subjects.indexOf(action.subject)
       newState.subjects[index].maxDepth = action.value
       break
+    case TOGGLE_ONLY_DIR:
+      index = newState.subjects.indexOf(action.subject)
+      newState.subjects[index].onlyDir = !newState.subjects[index].onlyDir
+      break
     case TOGGLE_FOLLOW_MOVE:
       index = newState.subjects.indexOf(action.subject)
       newState.subjects[index].followMove = !newState.subjects[index].followMove
@@ -83,6 +88,7 @@ export const toggleSubjectIgnore = (subject, value) => ({
 })
 export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject})
 export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, value})
+export const toggleOnlyDir = subject => ({type: TOGGLE_ONLY_DIR, subject})
 export const toggleFollowMove = subject => ({type: TOGGLE_FOLLOW_MOVE, subject})
 
 export const mapState = state => ({
@@ -97,5 +103,6 @@ export const mapDispatch = dispatch => ({
   toggleSubjectIgnore: (subject, value) => dispatch(toggleSubjectIgnore(subject, value)),
   toggleRecursive: index => dispatch(toggleRecursive(index)),
   dispatchSetMaxDepth: (subject, value) => dispatch(setMaxDepth(subject, value)),
+  toggleOnlyDir: subject => dispatch(toggleOnlyDir(subject)),
   toggleFollowMove: subject => dispatch(toggleFollowMove(subject)),
 })

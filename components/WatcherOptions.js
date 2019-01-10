@@ -9,6 +9,7 @@ class WatcherOptions extends React.Component {
     super(props)
     this.state = {
       events: this.props.events || [],
+      onlyDir: this.props.subject.onlyDir || false,
       followMove: this.props.subject.followMove || false,
     }
 
@@ -31,7 +32,8 @@ class WatcherOptions extends React.Component {
   }
 
   handleOnlyDirChange(event) {
-    this.props.onOnlyDirChange && this.props.onOnlyDirChange(this.props.subject)
+    this.setState({onlyDir: !this.state.onlyDir})
+    this.props.toggleOnlyDir(this.props.subject)
   }
 
   handleFollowMoveChange(event) {
@@ -127,7 +129,7 @@ class WatcherOptions extends React.Component {
 
           <label>
             <input type="checkbox"
-              checked={this.props.onlyDir}
+              checked={this.state.onlyDir}
               onChange={this.handleOnlyDirChange} />
             Only directories
           </label>
