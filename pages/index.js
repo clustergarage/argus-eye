@@ -24,12 +24,14 @@ class Index extends React.Component {
     super(props)
     this.state = {
       isRecursive: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].recursive || false,
+      maxDepth: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].maxDepth || undefined,
     }
 
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
-    this.onRecursiveChange = this.onRecursiveChange.bind(this)
     this.onIgnoreClick = this.onIgnoreClick.bind(this)
+    this.onRecursiveChange = this.onRecursiveChange.bind(this)
+    this.onMaxDepthChange = this.onMaxDepthChange.bind(this)
   }
 
   onSelectorSubmit(selector) {
@@ -44,15 +46,20 @@ class Index extends React.Component {
     this.props.dispatchSelectSubject(this.props.subjects.length - 1)
   }
 
+  onIgnoreClick(path) {
+    if (this.props.isVisible[path]) {
+      this.props.toggleVisibility(path)
+    }
+  }
+
   onRecursiveChange(subject) {
     this.props.toggleRecursive(subject)
     this.setState({isRecursive: subject.recursive})
   }
 
-  onIgnoreClick(path) {
-    if (this.props.isVisible[path]) {
-      this.props.toggleVisibility(path)
-    }
+  onMaxDepthChange(subject, value) {
+    this.props.dispatchSetMaxDepth(subject, value)
+    this.setState({maxDepth: value})
   }
 
   getSelectedSubject() {
@@ -80,22 +87,25 @@ class Index extends React.Component {
           <div className="row tool-container">
             <div className="column file-viewer">
               {this.props.directory &&
-                <h2>
-                  File Viewer&nbsp;
-                  <small>(PID: {this.props.directory.split('/')[2]})</small>
-                </h2>}
-                <FileTree directory={this.props.directory}
-                  subject={this.getSelectedSubject()} 
-                  recursive={this.state.isRecursive}
-                  onIgnoreClick={this.onIgnoreClick} />
+              <h2>
+                File Viewer&nbsp;
+                <small>(PID: {this.props.directory.split('/')[2]})</small>
+              </h2>}
+              <FileTree directory={this.props.directory}
+                subject={this.getSelectedSubject()} 
+                recursive={this.state.isRecursive}
+                maxDepth={this.state.maxDepth}
+                onIgnoreClick={this.onIgnoreClick} />
             </div>
             {this.props.selectedSubject !== null &&
-              <div className="column column-33 watcher-options">
-                <h3>Watcher Options</h3>
-                <WatcherOptions subject={this.getSelectedSubject()}
-                  recursive={this.state.isRecursive}
-                  onRecursiveChange={this.onRecursiveChange} />
-              </div>}
+            <div className="column column-33 watcher-options">
+              <h3>Watcher Options</h3>
+              <WatcherOptions subject={this.getSelectedSubject()}
+                recursive={this.state.isRecursive}
+                maxDepth={this.state.maxDepth}
+                onRecursiveChange={this.onRecursiveChange}
+                onMaxDepthChange={this.onMaxDepthChange} />
+            </div>}
           </div>
         </div>
 

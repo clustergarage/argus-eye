@@ -82,16 +82,16 @@ class Search extends React.Component {
         ))}
 
         {this.props.containers.length > 0 &&
-          <div className="container-select">
-            <i><CornerDownRight size={28} /></i>
-            {this.props.containers.map(container => (
-              <a key={container.containerID}
-                className={`button ${this.props.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
-                onClick={() => this.handleContainerClick(container.containerID)}>
-                {container.name}
-              </a>
-            ))}
-          </div>}
+        <div className="container-select">
+          <i><CornerDownRight size={28} /></i>
+          {this.props.containers.map(container => (
+            <a key={container.containerID}
+              className={`button ${this.props.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
+              onClick={() => this.handleContainerClick(container.containerID)}>
+              {container.name}
+            </a>
+          ))}
+        </div>}
 
         <style jsx>{`
           input[type="text"] {

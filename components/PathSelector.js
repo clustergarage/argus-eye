@@ -42,8 +42,14 @@ class PathSelector extends React.Component {
       let i = 0, len = this.props.subject.paths.length
       for (; i < len; ++i) {
         let fp = path.split('/')
+        let depth = 0
         do {
           fp.pop()
+          // if maxDepth is set and current recursion check exceeds it, break
+          if (this.props.maxDepth &&
+            ++depth > this.props.maxDepth) {
+            break
+          }
           if (fp.join('/') === this.props.subject.paths[i]) {
             return true
           }
@@ -105,7 +111,6 @@ class PathSelector extends React.Component {
     if (this.isIgnored()) {
       classes.push('ignored')
     }
-
     if (this.props.file.isDisabled) {
       classes.push('disabled')
     } else if (this.props.file.isSymlink) {
@@ -147,10 +152,10 @@ class PathSelector extends React.Component {
     return (
       <div className={classes.join(' ')}>
         {this.isRecursivelySelected() &&
-          <i className={`ignore ${this.isIgnored() ? 'selected' : ''}`}
-            onClick={this.handleIgnoreClick}>
-            <IgnoreIcon size={iconSize} />
-          </i>}
+        <i className={`ignore ${this.isIgnored() ? 'selected' : ''}`}
+          onClick={this.handleIgnoreClick}>
+          <IgnoreIcon size={iconSize} />
+        </i>}
         <i className="check" onClick={this.handleCheckboxClick}>
           <Icon size={iconSize} />
         </i>

@@ -3,6 +3,7 @@ const SET_SELECTOR = 'SET_SELECTOR'
 const TOGGLE_SUBJECT_PATH = 'TOGGLE_SUBJECT_PATH'
 const TOGGLE_SUBJECT_IGNORE = 'TOGGLE_SUBJECT_IGNORE'
 const TOGGLE_RECURSIVE = 'TOGGLE_RECURSIVE'
+const SET_MAX_DEPTH = 'SET_MAX_DEPTH'
 
 const initialState = {
   selector: {
@@ -28,38 +29,30 @@ const reducer = (state = initialState, action) => {
       newState.selector.matchLabels = labels
       break
     case TOGGLE_SUBJECT_PATH:
-      index = newState.subjects.indexOf(action.subject)
-      let paths = newState.subjects[index].paths || []
-      let pindex = paths.indexOf(action.path)
-      if (pindex > -1) {
-        paths.splice(pindex, 1)
-      } else {
-        paths.push(action.path)
-      }
-      newState.subjects = [
-        ...newState.subjects.slice(0, index),
-        newState.subjects[index] = Object.assign({}, newState.subjects[index], {paths}),
-        ...newState.subjects.slice(index + 1),
-      ]
-      break
     case TOGGLE_SUBJECT_IGNORE:
       index = newState.subjects.indexOf(action.subject)
-      let ignore = newState.subjects[index].ignore || []
-      let iindex = ignore.indexOf(action.name)
-      if (iindex > -1) {
-        ignore.splice(iindex, 1)
+      let arr = newState.subjects[index][action.key] || []
+      const idx = arr.indexOf(action.value)
+      if (idx > -1) {
+        arr.splice(idx, 1)
       } else {
-        ignore.push(action.name)
+        arr.push(action.value)
       }
       newState.subjects = [
         ...newState.subjects.slice(0, index),
-        newState.subjects[index] = Object.assign({}, newState.subjects[index], {ignore}),
+        newState.subjects[index] = Object.assign({}, newState.subjects[index], {
+          [action.key]: arr,
+        }),
         ...newState.subjects.slice(index + 1),
       ]
       break
     case TOGGLE_RECURSIVE:
       index = newState.subjects.indexOf(action.subject)
       newState.subjects[index].recursive = !newState.subjects[index].recursive
+      break
+    case SET_MAX_DEPTH:
+      index = newState.subjects.indexOf(action.subject)
+      newState.subjects[index].maxDepth = action.value
       break
     default:
       return state
@@ -71,9 +64,20 @@ export default reducer
 
 export const createSubject = () => ({type: CREATE_SUBJECT})
 export const setSelector = selector => ({type: SET_SELECTOR, selector})
-export const toggleSubjectPath = (subject, path) => ({type: TOGGLE_SUBJECT_PATH, subject, path})
-export const toggleSubjectIgnore = (subject, name) => ({type: TOGGLE_SUBJECT_IGNORE, subject, name})
+export const toggleSubjectPath = (subject, value) => ({
+  type: TOGGLE_SUBJECT_PATH,
+  subject,
+  key: 'paths',
+  value,
+})
+export const toggleSubjectIgnore = (subject, value) => ({
+  type: TOGGLE_SUBJECT_IGNORE,
+  subject,
+  key: 'ignore',
+  value,
+})
 export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject})
+export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, value})
 
 export const mapState = state => ({
   selector: state.objectConfig.selector,
@@ -83,7 +87,8 @@ export const mapState = state => ({
 export const mapDispatch = dispatch => ({
   dispatchCreateSubject: () => dispatch(createSubject()),
   dispatchSetSelector: selector => dispatch(setSelector(selector)),
-  toggleSubjectPath: (subject, path) => dispatch(toggleSubjectPath(subject, path)),
-  toggleSubjectIgnore: (subject, name) => dispatch(toggleSubjectIgnore(subject, name)),
+  toggleSubjectPath: (subject, value) => dispatch(toggleSubjectPath(subject, value)),
+  toggleSubjectIgnore: (subject, value) => dispatch(toggleSubjectIgnore(subject, value)),
   toggleRecursive: index => dispatch(toggleRecursive(index)),
+  dispatchSetMaxDepth: (subject, value) => dispatch(setMaxDepth(subject, value)),
 })

@@ -65,21 +65,23 @@ class FileTree extends React.Component {
             <PathSelector file={file}
               subject={this.props.subject}
               recursive={this.props.recursive}
+              maxDepth={this.props.maxDepth}
               onIgnoreClick={this.props.onIgnoreClick}
               onDirectoryClick={this.onDirectoryClick}
               onFileClick={this.onFileClick}
               isVisible={this.props.isVisible[file.path]} />
             {(file.isDirectory && this.props.isVisible[file.path]) &&
-              <FileTree directory={file.path}
-                files={file.files}
-                subject={this.props.subject}
-                recursive={this.props.recursive}
-                onIgnoreClick={this.props.onIgnoreClick}
-                onFileClick={this.props.onFileClick}
-                toggleVisibility={this.props.toggleVisibility}
-                dispatchOpenDirectory={this.props.dispatchOpenDirectory}
-                openedDirectories={this.props.openedDirectories}
-                isVisible={this.props.isVisible} />}
+            <FileTree directory={file.path}
+              files={file.files}
+              subject={this.props.subject}
+              recursive={this.props.recursive}
+              maxDepth={this.props.maxDepth}
+              onIgnoreClick={this.props.onIgnoreClick}
+              onFileClick={this.props.onFileClick}
+              toggleVisibility={this.props.toggleVisibility}
+              dispatchOpenDirectory={this.props.dispatchOpenDirectory}
+              openedDirectories={this.props.openedDirectories}
+              isVisible={this.props.isVisible} />}
           </li>
         ))}
 

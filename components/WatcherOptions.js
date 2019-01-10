@@ -12,14 +12,19 @@ class WatcherOptions extends React.Component {
     }
 
     this.handleEventChange = this.handleEventChange.bind(this)
-    this.onRecursiveChange = this.onRecursiveChange.bind(this)
+    this.handleRecursiveChange = this.handleRecursiveChange.bind(this)
+    this.handleMaxDepthChange = this.handleMaxDepthChange.bind(this)
   }
 
   handleEventChange(event) {
   }
 
-  onRecursiveChange(subject) {
+  handleRecursiveChange(event) {
     this.props.onRecursiveChange && this.props.onRecursiveChange(this.props.subject)
+  }
+
+  handleMaxDepthChange(event) {
+    this.props.onMaxDepthChange && this.props.onMaxDepthChange(this.props.subject, event.target.value)
   }
 
   render() {
@@ -81,44 +86,43 @@ class WatcherOptions extends React.Component {
           <label>
             <input type="checkbox"
               checked={this.props.recursive}
-              onChange={this.onRecursiveChange} />
+              onChange={this.handleRecursiveChange} />
             Recursive
             {this.props.recursive && (
-              <div className="recursive">
-                <label>
-                  Ignored paths&nbsp;
-                  <small>(<em>{getIgnoredPaths().length}</em> selected)</small>
-                  {getIgnoredPaths().length > 0 &&
-                  <ul className="ignored">
-                    {getIgnoredPaths().map((path, index) => (
-                      <li key={index}>
-                        <i><Minus size="14" /></i>
-                        {path}
-                      </li>
-                    ))}
-                  </ul>}
-                </label>
+            <div className="recursive">
+              <label>
+                Ignored paths&nbsp;
+                <small>(<em>{getIgnoredPaths().length}</em> selected)</small>
+                {getIgnoredPaths().length > 0 &&
+                <ul className="ignored">
+                  {getIgnoredPaths().map((path, index) => (
+                    <li key={index}>
+                      <i><Minus size="14" /></i>
+                      {path}
+                    </li>
+                  ))}
+                </ul>}
+              </label>
 
-                <label>
-                  Max depth
-                  <input type="text"
-                    value={this.state.maxDepth}
-                    onChange={this.handleMaxDepthChange} />
-                </label>
-              </div>
-            )}
+              <label>
+                Max depth
+                <input type="number"
+                  value={this.props.maxDepth}
+                  onChange={this.handleMaxDepthChange} />
+              </label>
+            </div>)}
           </label>
 
           <label>
             <input type="checkbox"
-              value={this.state.onlyDir}
+              checked={this.props.onlyDir}
               onChange={this.handleOnlyDirChange} />
             Only directories
           </label>
 
           <label>
             <input type="checkbox"
-              value={this.state.followMove}
+              checked={this.props.followMove}
               onChange={this.handleFollowMoveChange} />
             Follow move events
           </label>
@@ -128,7 +132,7 @@ class WatcherOptions extends React.Component {
             <small>(comma-separated <em>key=value</em> pairs)</small><br />
             <small>(e.g. <em>app=foo,env=dev</em>)</small>
             <input type="text"
-              value={this.state.tags}
+              value={this.props.tags}
               onChange={this.handleTagsChange} />
           </label>
         </form>
