@@ -29,16 +29,14 @@ class Search extends React.Component {
     this.props.onSelectorSubmit && this.props.onSelectorSubmit(this.state.labelSelector)
 
     const pods = await searchPods(this.state.labelSelector)
-    this.props.dispatchSetPods(pods.map(pod => {
-      return {
-        metadata: Object.keys(pod.metadata)
-          .filter(key => ['uid', 'namespace', 'name'].includes(key))
-          .reduce((obj, key) => {
-            obj[key] = pod.metadata[key]
-            return obj
-          }, {})
-      }
-    }))
+    this.props.dispatchSetPods(pods.map(pod => ({
+      metadata: Object.keys(pod.metadata)
+        .filter(key => ['uid', 'namespace', 'name'].includes(key))
+        .reduce((obj, key) => {
+          obj[key] = pod.metadata[key]
+          return obj
+        }, {})
+    })))
   }
 
   async handlePodClick(pod) {

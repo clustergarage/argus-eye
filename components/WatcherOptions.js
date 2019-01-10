@@ -88,7 +88,9 @@ class WatcherOptions extends React.Component {
             <small>(<em>{getSelectedPaths().length}</em> selected)</small>
             {getSelectedPaths().length > 0 &&
             <ul className="paths">
-              {getSelectedPaths().map((path, index) => (
+              {getSelectedPaths()
+                .sort()
+                .map((path, index) => (
                 <li key={index}>
                   <i><Plus size="14" /></i>
                   {path}
@@ -109,7 +111,9 @@ class WatcherOptions extends React.Component {
                 <small>(<em>{getIgnoredPaths().length}</em> selected)</small>
                 {getIgnoredPaths().length > 0 &&
                 <ul className="ignored">
-                  {getIgnoredPaths().map((path, index) => (
+                  {getIgnoredPaths()
+                    .sort()
+                    .map((path, index) => (
                     <li key={index}>
                       <i><Minus size="14" /></i>
                       {path}

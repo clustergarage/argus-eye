@@ -24,7 +24,7 @@ class Index extends React.Component {
     super(props)
     this.state = {
       isRecursive: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].recursive || false,
-      maxDepth: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].maxDepth || undefined,
+      maxDepth: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].maxDepth || '',
     }
 
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)

@@ -48,21 +48,15 @@ const reducer = (state = initialState, action) => {
         ...newState.subjects.slice(index + 1),
       ]
       break
-    case TOGGLE_RECURSIVE:
-      index = newState.subjects.indexOf(action.subject)
-      newState.subjects[index].recursive = !newState.subjects[index].recursive
-      break
     case SET_MAX_DEPTH:
       index = newState.subjects.indexOf(action.subject)
       newState.subjects[index].maxDepth = action.value
       break
+    case TOGGLE_RECURSIVE:
     case TOGGLE_ONLY_DIR:
-      index = newState.subjects.indexOf(action.subject)
-      newState.subjects[index].onlyDir = !newState.subjects[index].onlyDir
-      break
     case TOGGLE_FOLLOW_MOVE:
       index = newState.subjects.indexOf(action.subject)
-      newState.subjects[index].followMove = !newState.subjects[index].followMove
+      newState.subjects[index][action.key] = !newState.subjects[index][action.key]
       break
     default:
       return state
@@ -86,10 +80,10 @@ export const toggleSubjectIgnore = (subject, value) => ({
   key: 'ignore',
   value,
 })
-export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject})
+export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject, key: 'recursive'})
 export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, value})
-export const toggleOnlyDir = subject => ({type: TOGGLE_ONLY_DIR, subject})
-export const toggleFollowMove = subject => ({type: TOGGLE_FOLLOW_MOVE, subject})
+export const toggleOnlyDir = subject => ({type: TOGGLE_ONLY_DIR, subject, key: 'onlyDir'})
+export const toggleFollowMove = subject => ({type: TOGGLE_FOLLOW_MOVE, subject, key: 'followMove'})
 
 export const mapState = state => ({
   selector: state.objectConfig.selector,
