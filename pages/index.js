@@ -22,16 +22,17 @@ import {
 class Index extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      isRecursive: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].recursive || false,
-      maxDepth: this.props.selectedSubject !== null && this.props.subjects[this.props.selectedSubject].maxDepth || '',
-    }
+    this.state = this.getSubjectState(this.props.selectedSubject)
 
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
+    this.onCreateSubjectClick = this.onCreateSubjectClick.bind(this)
+    this.onSelectSubjectClick = this.onSelectSubjectClick.bind(this)
     this.onIgnoreClick = this.onIgnoreClick.bind(this)
     this.onRecursiveChange = this.onRecursiveChange.bind(this)
     this.onMaxDepthChange = this.onMaxDepthChange.bind(this)
+    this.onOnlyDirChange = this.onOnlyDirChange.bind(this)
+    this.onFollowMoveChange = this.onFollowMoveChange.bind(this)
   }
 
   onSelectorSubmit(selector) {
@@ -40,10 +41,36 @@ class Index extends React.Component {
 
   onLoadRootDirectory(cid, directory) {
     this.props.dispatchSetRootDirectory(cid, directory)
+    this.createAndSelectSubject()
+  }
 
-    // @TODO: make this a user action
+  onCreateSubjectClick() {
+    this.createAndSelectSubject()
+  }
+
+  createAndSelectSubject() {
+    const len = this.props.subjects.length
     this.props.dispatchCreateSubject()
-    this.props.dispatchSelectSubject(this.props.subjects.length - 1)
+    this.selectSubject(len)
+  }
+
+  onSelectSubjectClick(index) {
+    this.selectSubject(index)
+  }
+
+  selectSubject(index) {
+    this.props.dispatchSelectSubject(index)
+    this.setState(this.getSubjectState(index))
+  }
+
+  getSubjectState(index) {
+    const subject = this.props.subjects[index] || {}
+    return {
+      recursive: subject.recursive || false,
+      maxDepth: subject.maxDepth || '',
+      onlyDir: subject.onlyDir || false,
+      followMove: subject.followMove || false,
+    }
   }
 
   onIgnoreClick(path) {
@@ -54,12 +81,22 @@ class Index extends React.Component {
 
   onRecursiveChange(subject) {
     this.props.toggleRecursive(subject)
-    this.setState({isRecursive: subject.recursive})
+    this.setState({recursive: subject.recursive})
   }
 
   onMaxDepthChange(subject, value) {
     this.props.dispatchSetMaxDepth(subject, value)
     this.setState({maxDepth: value})
+  }
+
+  onOnlyDirChange(subject) {
+    this.props.toggleOnlyDir(subject)
+    this.setState({onlyDir: subject.onlyDir})
+  }
+
+  onFollowMoveChange(subject) {
+    this.props.toggleFollowMove(subject)
+    this.setState({followMove: subject.followMove})
   }
 
   getSelectedSubject() {
@@ -93,38 +130,107 @@ class Index extends React.Component {
               </h2>}
               <FileTree directory={this.props.directory}
                 subject={this.getSelectedSubject()}
-                recursive={this.state.isRecursive}
+                recursive={this.state.recursive}
                 maxDepth={this.state.maxDepth}
                 onIgnoreClick={this.onIgnoreClick} />
             </div>
-            {this.props.selectedSubject !== null &&
-            <div className="column column-33 watcher-options">
-              <h3>Watcher Options</h3>
-              <WatcherOptions subject={this.getSelectedSubject()}
-                recursive={this.state.isRecursive}
-                maxDepth={this.state.maxDepth}
-                onRecursiveChange={this.onRecursiveChange}
-                onMaxDepthChange={this.onMaxDepthChange} />
-            </div>}
+            <div className="column column-33">
+              {this.props.selectedSubject !== null &&
+              <div>
+                <div className="watcher-subjects">
+                  <h3>Watcher Subjects</h3>
+                  {this.props.subjects.map((subject, index) => (
+                  <div key={index}
+                    onClick={() => this.onSelectSubjectClick(index)}
+                    className={`subject ${this.props.selectedSubject === index ? 'active' : ''}`}>
+                    <div className="title">
+                      Subject {index}
+                    </div>
+                    <small>
+                      paths = {subject.paths.length};
+                      events = {subject.events.length};
+                      recursive = {subject.recursive ? 'Y' : 'N'}
+                    </small>
+                  </div>
+                  ))}
+                  <button type="button"
+                    onClick={this.onCreateSubjectClick}
+                    className="button button-small create-subject">
+                    Create subject
+                  </button>
+                </div>
+                <div className="watcher-options">
+                  <h3>Watcher Options</h3>
+                  <WatcherOptions subject={this.getSelectedSubject()}
+                    recursive={this.state.recursive}
+                    maxDepth={this.state.maxDepth}
+                    onlyDir={this.state.onlyDir}
+                    followMove={this.state.followMove}
+                    onRecursiveChange={this.onRecursiveChange}
+                    onMaxDepthChange={this.onMaxDepthChange}
+                    onOnlyDirChange={this.onOnlyDirChange}
+                    onFollowMoveChange={this.onFollowMoveChange} />
+                </div>
+              </div>}
+            </div>
           </div>
         </div>
 
         <style jsx>{`
-          h1 i {
-            vertical-align: sub;
-            margin: 1rem 0 0 1rem;
-          }
+        h1 i {
+          vertical-align: sub;
+          margin: 1rem 0 0 1rem;
+        }
 
-          .tool-container {
-            margin-top: 4rem;
-          }
+        .tool-container {
+          margin-top: 4rem;
+        }
 
-          .file-viewer h2 small {
-            font: 1.75rem "Ubuntu Mono", monospace;
-          }
+        .file-viewer h2 small {
+          font: 1.75rem "Ubuntu Mono", monospace;
+        }
 
-          .watcher-options {
-          }
+        .watcher-subjects {
+          margin-bottom: 3rem;
+        }
+
+        .watcher-subjects .subject {
+          border: 1px solid #c6f7e2;
+          border-radius: 0.6rem;
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+          cursor: pointer;
+        }
+
+        .watcher-subjects .subject.active {
+          color: #000;
+          border-width: 2px;
+          background-color: #effcf6;
+        }
+
+        .watcher-subjects .title {
+          font-size: 1.5rem;
+        }
+
+        .watcher-subjects .subject small {
+          font: 1.2rem "Ubuntu Mono", monospace;
+        }
+
+        .watcher-subjects .button {
+          color: #000;
+          background-color: #c6f7e2;
+          border-color: #c6f7e2;
+        }
+
+        .watcher-subjects .button:hover {
+          color: #fff;
+          background-color: #606c76;
+          border-color: #606c76;
+        }
+
+        .watcher-subjects .button.create-subject {
+          font-size: 0.8rem;
+        }
         `}</style>
       </Layout>
     )

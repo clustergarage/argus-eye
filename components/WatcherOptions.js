@@ -16,9 +16,6 @@ class WatcherOptions extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      events: this.props.subject.events || [],
-      onlyDir: this.props.subject.onlyDir || false,
-      followMove: this.props.subject.followMove || false,
       tags: this.props.tags || '',
       logFormat: this.props.logFormat || '',
       showSpecifiers: false,
@@ -37,7 +34,6 @@ class WatcherOptions extends React.Component {
 
   handleEventChange(event) {
     this.props.toggleEvent(this.props.subject, event)
-    this.setState({events: this.props.subject.events})
   }
 
   handleRecursiveChange(event) {
@@ -48,14 +44,12 @@ class WatcherOptions extends React.Component {
     this.props.onMaxDepthChange && this.props.onMaxDepthChange(this.props.subject, event.target.value)
   }
 
-  handleOnlyDirChange(event) {
-    this.setState({onlyDir: !this.state.onlyDir})
-    this.props.toggleOnlyDir(this.props.subject)
+  handleOnlyDirChange() {
+    this.props.onOnlyDirChange && this.props.onOnlyDirChange(this.props.subject)
   }
 
-  handleFollowMoveChange(event) {
-    this.setState({followMove: !this.state.followMove})
-    this.props.toggleFollowMove(this.props.subject)
+  handleFollowMoveChange() {
+    this.props.onFollowMoveChange && this.props.onFollowMoveChange(this.props.subject)
   }
 
   handleTagsChange(event) {
@@ -94,7 +88,7 @@ class WatcherOptions extends React.Component {
     const value = this.state.logFormat.slice(0, selection) +
       `{${specifier.name}}` +
       this.state.logFormat.slice(this.logFormatInput.selectionEnd)
-    this.setState({logFormat: value}, ()=> {
+    this.setState({logFormat: value}, () => {
       const newSelection = selection + specifier.name.length + 2
       this.logFormatInput.selectionStart = this.logFormatInput.selectionEnd = newSelection
       this.props.dispatchSetLogFormat(value)
@@ -159,7 +153,7 @@ class WatcherOptions extends React.Component {
             {events.map(event => (
             <span key={event}>
               <button type="button"
-                className={`button button-small ${this.state.events.indexOf(event) === -1 ? 'button-outline' : ''}`}
+                className={`button button-small ${this.props.subject.events.indexOf(event) === -1 ? 'button-outline' : ''}`}
                 onClick={() => this.handleEventChange(event)}>
                 {event}{['close', 'move', 'all'].indexOf(event) > -1 ? ' *' : ''}
               </button>
@@ -212,14 +206,14 @@ class WatcherOptions extends React.Component {
 
           <label>
             <input type="checkbox"
-              checked={this.state.onlyDir}
+              checked={this.props.onlyDir}
               onChange={this.handleOnlyDirChange} />
             Only directories
           </label>
 
           <label>
             <input type="checkbox"
-              checked={this.state.followMove}
+              checked={this.props.followMove}
               onChange={this.handleFollowMoveChange} />
             Follow move events
           </label>
@@ -348,6 +342,7 @@ class WatcherOptions extends React.Component {
 
         .log-format .live-example em {
           display: inline-block;
+          line-height: 1.6rem;
           word-break: break-all;
           margin: 1rem 0;
         }
