@@ -32,6 +32,13 @@ class WatcherOptions extends React.Component {
     this.insertSpecifier = this.insertSpecifier.bind(this)
   }
 
+  componentDidUpdate({tags: prevTags}) {
+    const {tags} = this.props
+    if (tags !== prevTags) {
+      this.setState({tags})
+    }
+  }
+
   handleEventChange(event) {
     this.props.toggleEvent(this.props.subject, event)
   }
@@ -72,6 +79,8 @@ class WatcherOptions extends React.Component {
     if (JSON.stringify(oldTags) !== JSON.stringify(newTags)) {
       this.props.dispatchSetTags(this.props.subject, newTags)
     }
+
+    this.props.onTagsChange && this.props.onTagsChange(event.target.value)
   }
 
   handleLogFormatChange(event) {
@@ -147,9 +156,11 @@ class WatcherOptions extends React.Component {
     return (
       <div>
         <form>
-          <label className="events">
-            Events<br />
-            <div>
+          <label>
+            Events&nbsp;
+            <small>(<em>*</em> denotes a combined event)</small>
+          </label>
+          <div className="events">
             {events.map(event => (
             <span key={event}>
               <button type="button"
@@ -158,9 +169,7 @@ class WatcherOptions extends React.Component {
                 {event}{['close', 'move', 'all'].indexOf(event) > -1 ? ' *' : ''}
               </button>
             </span>))}
-            </div>
-            <small><em>*</em> denotes a combined event</small>
-          </label>
+          </div>
 
           <label>
             Paths&nbsp;

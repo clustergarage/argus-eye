@@ -6,18 +6,9 @@ import Layout from '../components/Layout'
 import Search from '../components/Search'
 import FileTree from '../components/FileTree'
 import WatcherOptions from '../components/WatcherOptions'
-import {
-  mapState as mapSearchState,
-  mapDispatch as mapSearchDispatch,
-} from '../reducers/search'
-import {
-  mapState as mapTreeState,
-  mapDispatch as mapTreeDispatch,
-} from '../reducers/file-tree'
-import {
-  mapState as mapConfigState,
-  mapDispatch as mapConfigDispatch,
-} from '../reducers/object-config'
+import {mapState as mapSearchState, mapDispatch as mapSearchDispatch} from '../reducers/search'
+import {mapState as mapTreeState, mapDispatch as mapTreeDispatch} from '../reducers/file-tree'
+import {mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
 
 class Index extends React.Component {
   constructor(props) {
@@ -33,15 +24,22 @@ class Index extends React.Component {
     this.onMaxDepthChange = this.onMaxDepthChange.bind(this)
     this.onOnlyDirChange = this.onOnlyDirChange.bind(this)
     this.onFollowMoveChange = this.onFollowMoveChange.bind(this)
+    this.onTagsChange = this.onTagsChange.bind(this)
   }
 
   onSelectorSubmit(selector) {
-    this.props.dispatchSetSelector && this.props.dispatchSetSelector(selector)
+    this.props.dispatchSetSelector(selector)
+    this.props.dispatchClearSearchState()
   }
 
   onLoadRootDirectory(cid, directory) {
+    this.setState({isLoading: true})
+    // @TODO: confirm with the user before clearing config state especially
+    this.props.dispatchClearConfigState()
+
     this.props.dispatchSetRootDirectory(cid, directory)
     this.createAndSelectSubject()
+    this.setState({isLoading: false})
   }
 
   onCreateSubjectClick() {
@@ -65,11 +63,15 @@ class Index extends React.Component {
 
   getSubjectState(index) {
     const subject = this.props.subjects[index] || {}
+    const tags = Object.keys(subject.tags || {})
+      .map(tag => `${tag}=${subject.tags[tag]}`)
+      .join(',')
     return {
       recursive: subject.recursive || false,
       maxDepth: subject.maxDepth || '',
       onlyDir: subject.onlyDir || false,
       followMove: subject.followMove || false,
+      tags: tags,
     }
   }
 
@@ -99,6 +101,10 @@ class Index extends React.Component {
     this.setState({followMove: subject.followMove})
   }
 
+  onTagsChange(tags) {
+    this.setState({tags})
+  }
+
   getSelectedSubject() {
     return this.props.subjects[this.props.selectedSubject]
   }
@@ -121,21 +127,22 @@ class Index extends React.Component {
             </div>
           </div>
 
+          {!this.state.isLoading &&
           <div className="row tool-container">
+            {this.props.directory &&
             <div className="column file-viewer">
-              {this.props.directory &&
               <h2>
                 File Viewer&nbsp;
                 <small>(PID: {this.props.directory.split('/')[2]})</small>
-              </h2>}
+              </h2>
               <FileTree directory={this.props.directory}
                 subject={this.getSelectedSubject()}
                 recursive={this.state.recursive}
                 maxDepth={this.state.maxDepth}
                 onIgnoreClick={this.onIgnoreClick} />
-            </div>
+            </div>}
+            {this.props.selectedSubject !== null &&
             <div className="column column-33">
-              {this.props.selectedSubject !== null &&
               <div>
                 <div className="watcher-subjects">
                   <h3>Watcher Subjects</h3>
@@ -166,14 +173,16 @@ class Index extends React.Component {
                     maxDepth={this.state.maxDepth}
                     onlyDir={this.state.onlyDir}
                     followMove={this.state.followMove}
+                    tags={this.state.tags}
                     onRecursiveChange={this.onRecursiveChange}
                     onMaxDepthChange={this.onMaxDepthChange}
                     onOnlyDirChange={this.onOnlyDirChange}
-                    onFollowMoveChange={this.onFollowMoveChange} />
+                    onFollowMoveChange={this.onFollowMoveChange}
+                    onTagsChange={this.onTagsChange} />
                 </div>
-              </div>}
-            </div>
-          </div>
+              </div>
+            </div>}
+          </div>}
         </div>
 
         <style jsx>{`
@@ -197,14 +206,14 @@ class Index extends React.Component {
         .watcher-subjects .subject {
           border: 1px solid #c6f7e2;
           border-radius: 0.6rem;
-          padding: 1.5rem;
-          margin-bottom: 2rem;
+          padding: 1rem;
+          margin-bottom: 1rem;
           cursor: pointer;
         }
 
         .watcher-subjects .subject.active {
           color: #000;
-          border-width: 2px;
+          border-width: 3px;
           background-color: #effcf6;
         }
 

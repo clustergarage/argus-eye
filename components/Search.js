@@ -14,7 +14,6 @@ class Search extends React.Component {
 
     this.handleLabelSelectorChange = this.handleLabelSelectorChange.bind(this)
     this.handleLabelSelectorSubmit = this.handleLabelSelectorSubmit.bind(this)
-    this.handlePodClick = this.handlePodClick.bind(this)
     this.handleContainerClick = this.handleContainerClick.bind(this)
   }
 
@@ -24,10 +23,35 @@ class Search extends React.Component {
 
   async handleLabelSelectorSubmit(event) {
     event.preventDefault()
+
     this.props.dispatchSetLabelSelector(this.state.labelSelector)
     // bubble up labelSelector state so we can inform objectConfig
     this.props.onSelectorSubmit && this.props.onSelectorSubmit(this.state.labelSelector)
 
+    const pods = await this.loadPods()
+    if (pods.length) {
+      const containers = await this.selectPod(pods[0])
+      if (containers.length === 1) {
+        this.selectContainer(containers[0].containerID)
+      } else {
+        // make the user choose
+        this.props.dispatchSetContainers(containers.map(container => {
+          return Object.keys(container)
+            .filter(key => ['containerID', 'name'].includes(key))
+            .reduce((obj, key) => {
+              obj[key] = container[key]
+              return obj
+            }, {})
+        }))
+      }
+    }
+  }
+
+  async handleContainerClick(cid) {
+    this.selectContainer(cid)
+  }
+
+  async loadPods() {
     const pods = await searchPods(this.state.labelSelector)
     this.props.dispatchSetPods(pods.map(pod => ({
       metadata: Object.keys(pod.metadata)
@@ -37,22 +61,16 @@ class Search extends React.Component {
           return obj
         }, {})
     })))
+    return pods
   }
 
-  async handlePodClick(pod) {
-    const {uid, namespace, name} = pod.metadata
+  async selectPod(pod) {
+    const {namespace, name} = pod.metadata
     const containers = await podContainers(namespace, name)
-    this.props.dispatchSetContainers(uid, containers.map(container => {
-      return Object.keys(container)
-        .filter(key => ['containerID', 'name'].includes(key))
-        .reduce((obj, key) => {
-          obj[key] = container[key]
-          return obj
-        }, {})
-    }))
+    return containers
   }
 
-  async handleContainerClick(cid) {
+  async selectContainer(cid) {
     const pid = await containerPID(cid)
     this.props.onLoadRootDirectory && this.props.onLoadRootDirectory(cid, `/proc/${pid}/root`)
   }
@@ -70,14 +88,13 @@ class Search extends React.Component {
           <input type="submit" value="Submit" />
         </form>
 
-        {this.props.pods.length > 0 && <h4>Found pods</h4>}
-        {this.props.pods.map(pod => (
-          <a key={pod.metadata.uid}
-            className={`button ${this.props.selectedPod !== pod.metadata.uid ? 'button-outline' : ''}`}
-            onClick={() => this.handlePodClick(pod)}>
-            {pod.metadata.name}
-          </a>
-        ))}
+        {this.props.pods.length > 0 &&
+        <h5>
+          Found <em>{this.props.pods.length}</em> pod{this.props.pods.length !== 1 && 's'}
+        </h5>}
+        <div className="found-pods">
+          {this.props.pods.map(pod => <a key={pod.metadata.uid}>{pod.metadata.name}</a>)}
+        </div>
 
         {this.props.containers.length > 0 &&
         <div className="container-select">
@@ -92,6 +109,13 @@ class Search extends React.Component {
         </div>}
 
         <style jsx>{`
+          h5 em {
+            color: #000;
+            font-style: normal;
+            background-color: #c6f7e2;
+            padding: 0.1rem 0.4rem;
+          }
+
           input[type="text"] {
             color: #627d98;
             font: 1.6rem 'Ubuntu Mono', monospace;
@@ -99,6 +123,14 @@ class Search extends React.Component {
 
           a.button {
             margin-right: 1rem;
+          }
+
+          .found-pods {
+            margin-bottom: 1rem;
+          }
+
+          .found-pods a {
+            margin-right: 4rem;
           }
 
           .container-select i {

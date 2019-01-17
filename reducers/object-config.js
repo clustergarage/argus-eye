@@ -9,6 +9,7 @@ const TOGGLE_FOLLOW_MOVE = 'TOGGLE_FOLLOW_MOVE'
 const SET_MAX_DEPTH = 'SET_MAX_DEPTH'
 const SET_TAGS = 'SET_TAGS'
 const SET_LOG_FORMAT = 'SET_LOG_FORMAT'
+const CLEAR_CONFIG_STATE = 'CLEAR_CONFIG_STATE'
 
 const initialState = {
   selector: {
@@ -63,6 +64,12 @@ const reducer = (state = initialState, action) => {
     case SET_LOG_FORMAT:
       newState.logFormat = action.value
       break
+    case CLEAR_CONFIG_STATE:
+      Object.assign(newState, {
+        subjects: [],
+        logFormat: null,
+      })
+      break
     default:
       return state
   }
@@ -73,31 +80,16 @@ export default reducer
 
 export const createSubject = () => ({type: CREATE_SUBJECT})
 export const setSelector = selector => ({type: SET_SELECTOR, selector})
-export const toggleEvent = (subject, value) => ({
-  type: TOGGLE_EVENT,
-  subject,
-  event,
-  key: 'events',
-  value,
-})
-export const toggleSubjectPath = (subject, value) => ({
-  type: TOGGLE_SUBJECT_PATH,
-  subject,
-  key: 'paths',
-  value,
-})
-export const toggleSubjectIgnore = (subject, value) => ({
-  type: TOGGLE_SUBJECT_IGNORE,
-  subject,
-  key: 'ignore',
-  value,
-})
+export const toggleEvent = (subject, value) => ({type: TOGGLE_EVENT, subject, event, key: 'events', value})
+export const toggleSubjectPath = (subject, value) => ({type: TOGGLE_SUBJECT_PATH, subject, key: 'paths', value})
+export const toggleSubjectIgnore = (subject, value) => ({type: TOGGLE_SUBJECT_IGNORE, subject, key: 'ignore', value})
 export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject, key: 'recursive'})
 export const toggleOnlyDir = subject => ({type: TOGGLE_ONLY_DIR, subject, key: 'onlyDir'})
 export const toggleFollowMove = subject => ({type: TOGGLE_FOLLOW_MOVE, subject, key: 'followMove'})
 export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, key: 'maxDepth', value})
 export const setTags = (subject, value) => ({type: SET_TAGS, subject, key: 'tags', value})
 export const setLogFormat = value => ({type: SET_LOG_FORMAT, value})
+export const clearConfigState = () => ({type: CLEAR_CONFIG_STATE})
 
 export const mapState = state => ({
   selector: state.objectConfig.selector,
@@ -117,4 +109,5 @@ export const mapDispatch = dispatch => ({
   dispatchSetMaxDepth: (subject, value) => dispatch(setMaxDepth(subject, value)),
   dispatchSetTags: (subject, value) => dispatch(setTags(subject, value)),
   dispatchSetLogFormat: value => dispatch(setLogFormat(value)),
+  dispatchClearConfigState: () => dispatch(clearConfigState()),
 })
