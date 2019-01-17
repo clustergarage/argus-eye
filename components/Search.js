@@ -80,7 +80,7 @@ class Search extends React.Component {
       <div>
         <form onSubmit={this.handleLabelSelectorSubmit}>
           <label>
-            Label selector:
+            Label selector
             <input type="text"
               value={this.state.labelSelector}
               onChange={this.handleLabelSelectorChange} />
@@ -89,12 +89,12 @@ class Search extends React.Component {
         </form>
 
         {this.props.pods.length > 0 &&
-        <h5>
+        <label className="found-pods">
           Found <em>{this.props.pods.length}</em> pod{this.props.pods.length !== 1 && 's'}
-        </h5>}
-        <div className="found-pods">
-          {this.props.pods.map(pod => <a key={pod.metadata.uid}>{pod.metadata.name}</a>)}
-        </div>
+          <div>
+            {this.props.pods.map(pod => <a key={pod.metadata.uid}>{pod.metadata.name}</a>)}
+          </div>
+        </label>}
 
         {this.props.containers.length > 0 &&
         <div className="container-select">
@@ -109,11 +109,8 @@ class Search extends React.Component {
         </div>}
 
         <style jsx>{`
-          h5 em {
-            color: #000;
-            font-style: normal;
-            background-color: #c6f7e2;
-            padding: 0.1rem 0.4rem;
+          form {
+            margin-bottom: 2rem;
           }
 
           input[type="text"] {
@@ -129,8 +126,18 @@ class Search extends React.Component {
             margin-bottom: 1rem;
           }
 
+          .found-pods em {
+            color: #000;
+            font-style: normal;
+            background-color: #c6f7e2;
+            padding: 0.1rem 0.4rem;
+          }
+
           .found-pods a {
-            margin-right: 4rem;
+            color: #627d98;
+            font: 1.4rem 'Ubuntu Mono', monospace;
+            font-weight: normal;
+            margin-right: 3rem;
           }
 
           .container-select i {

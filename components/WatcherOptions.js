@@ -230,10 +230,10 @@ class WatcherOptions extends React.Component {
           <label>
             Custom tags&nbsp;
             <small>(comma-separated <em>key=value</em> pairs)</small><br />
-            <small>(e.g. <em>app=foo,env=dev</em>)</small>
             <input type="text"
               value={this.state.tags}
-              onChange={this.handleTagsChange} />
+              onChange={this.handleTagsChange}
+              placeholder="app=foo,env=dev" />
           </label>
 
           <label className="log-format">
@@ -301,6 +301,11 @@ class WatcherOptions extends React.Component {
           padding: 0.1rem 0.2rem;
         }
 
+        input[type="text"]::placeholder {
+          color: #bcccdc;
+          font-style: italic;
+        }
+
         .button {
           margin: 0 0.5rem 0.5rem 0;
         }
@@ -342,11 +347,6 @@ class WatcherOptions extends React.Component {
           border-top: 2px solid #d9e2ec;
           margin-top: 1.5rem;
           padding-top: 2rem;
-        }
-
-        .log-format input[type="text"]::placeholder {
-          color: #bcccdc;
-          font-style: italic;
         }
 
         .log-format .live-example em {
