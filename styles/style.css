@@ -5,6 +5,14 @@ input[type="text"]::placeholder {
   font-style: italic;
 }
 
+h3 em,
+h4 em {
+  font-family: 'Ubuntu Mono', monospace;
+  font-style: normal;
+  text-decoration: underline;
+  text-decoration-color: #bcccdc;
+}
+
 .button:focus {
   background-color: #9b4dca;
   border-color: #9b4dca;
@@ -49,6 +57,10 @@ input[type="text"]::placeholder {
   position: absolute;
   top: 0.6rem;
   right: 0.75rem;
+}
+
+.copy-clipboard [data-clipboard-text] {
+  height: 18px;
 }
 
 .copy-clipboard i {

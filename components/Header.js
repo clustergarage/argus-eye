@@ -12,7 +12,7 @@ const Header = () => (
       <Link href="/">
         <a>Visual editor</a>
       </Link>
-      <Link href="/object-config">
+      <Link href="/export-config">
         <a>Export configuration</a>
       </Link>
     </div>

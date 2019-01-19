@@ -10,24 +10,41 @@ import 'react-hint/css/index.css'
 
 import Layout from '../components/Layout'
 import {json2yaml} from '../lib/json2yaml'
+import {mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
 
 const ReactHint = ReactHintFactory(React)
-const COPY_TOOLTIP = 'Copy to clipboard.'
-const COPIED_TOOLTIP = 'Copied to clipboard!'
+const COPY_TOOLTIP = (<span>Copy to clipboard.</span>)
+const COPIED_TOOLTIP = (<span><b>Copied</b> to clipboard!</span>)
 
-class ObjectConfig extends React.Component {
+class ExportConfig extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      name: this.props.objectConfig.name || '',
+      namespace: this.props.objectConfig.namespace || '',
       tooltip: {
         json: COPY_TOOLTIP,
         yaml: COPY_TOOLTIP,
       },
     }
 
+    this.handleNameChange = this.handleNameChange.bind(this)
+    this.handleNamespaceChange = this.handleNamespaceChange.bind(this)
     this.handleDownloadClick = this.handleDownloadClick.bind(this)
     this.handleDeployToClusterClick = this.handleDeployToClusterClick.bind(this)
     this.handleTooltipClick = this.handleTooltipClick.bind(this)
+    this.handleTooltipLeave = this.handleTooltipLeave.bind(this)
+    this.onRenderTooltipContent = this.onRenderTooltipContent.bind(this)
+  }
+
+  handleNameChange(event) {
+     this.setState({name: event.target.value})
+    this.props.dispatchSetName(event.target.value)
+  }
+
+  handleNamespaceChange(event) {
+     this.setState({namespace: event.target.value})
+    this.props.dispatchSetNamespace(event.target.value)
   }
 
   handleDownloadClick(event) {
@@ -44,6 +61,15 @@ class ObjectConfig extends React.Component {
     let tooltip = this.state.tooltip
     Object.keys(tooltip).map(k => tooltip[k] = key === k ? COPIED_TOOLTIP : COPY_TOOLTIP)
     this.setState({tooltip})
+  }
+
+  handleTooltipLeave(event, key) {
+    event.preventDefault()
+    this.setState({tooltip: {...this.state.tooltip, [key]: COPY_TOOLTIP}})
+  }
+
+  onRenderTooltipContent(key) {
+    return (<div className="react-hint__content">{this.state.tooltip[key]}</div>)
   }
 
   getObjectConfigJSON() {
@@ -73,6 +99,33 @@ class ObjectConfig extends React.Component {
       <Layout>
         <div className="container">
           <div className="row">
+            <div className="column">
+              <h3>
+                <em>ArgusWatcher</em> Metadata
+              </h3>
+            </div>
+          </div>
+          <div className="row">
+            <div className="column">
+              <label>
+                Name
+                <input type="text"
+                  value={this.state.name}
+                  onChange={this.handleNameChange}
+                  placeholder="mywatcher" />
+              </label>
+            </div>
+            <div className="column">
+              <label>
+                Namespace
+                <input type="text"
+                  value={this.state.namespace}
+                  onChange={this.handleNamespaceChange}
+                  placeholder="mynamespace" />
+              </label>
+            </div>
+          </div>
+          <div className="row">
             <div className="column buttons">
               <button type="button"
                 className="button"
@@ -94,10 +147,12 @@ class ObjectConfig extends React.Component {
               <div className="output-syntax">
                 <ReactHint attribute="data-yaml"
                   position="top"
-                  events={{hover: true}} />
+                  events={{hover: true}}
+                  onRenderContent={() => this.onRenderTooltipContent('yaml')} />
                 <div className="copy-clipboard"
                   data-yaml={this.state.tooltip.yaml}
-                  onClick={() => this.handleTooltipClick('yaml')}>
+                  onClick={() => this.handleTooltipClick('yaml')}
+                  onMouseLeave={event => this.handleTooltipLeave(event, 'yaml')}>
                   <Clipboard component="div"
                     data-clipboard-text={yamlFormatted}>
                     <i><Copy size={18} /></i>
@@ -113,10 +168,12 @@ class ObjectConfig extends React.Component {
               <div className="output-syntax">
                 <ReactHint attribute="data-json"
                   position="top"
-                  events={{hover: true}} />
+                  events={{hover: true}}
+                  onRenderContent={() => this.onRenderTooltipContent('json')} />
                 <div className="copy-clipboard"
                   data-json={this.state.tooltip.json}
-                  onClick={() => this.handleTooltipClick('json')}>
+                  onClick={() => this.handleTooltipClick('json')}
+                  onMouseLeave={event => this.handleTooltipLeave(event, 'json')}>
                   <Clipboard component="div"
                     data-clipboard-text={jsonFormatted}>
                     <i><Copy size={18} /></i>
@@ -164,8 +221,8 @@ class ObjectConfig extends React.Component {
   }
 }
 
-export const mapState = state => ({
-  objectConfig: state.objectConfig,
-})
+const mapState = state => (Object.assign({}, {
+  objectConfig: mapConfigState(state),
+}))
 
-export default connect(mapState)(ObjectConfig)
+export default connect(mapState, mapDispatch)(ExportConfig)

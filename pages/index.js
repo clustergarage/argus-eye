@@ -13,14 +13,10 @@ class Index extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      name: this.props.name || '',
-      namespace: this.props.namespace || '',
       spec: this.getSubjectState(this.props.selectedSubject),
       isLoading: false,
     }
 
-    this.handleNameChange = this.handleNameChange.bind(this)
-    this.handleNamespaceChange = this.handleNamespaceChange.bind(this)
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
     this.onCreateSubjectClick = this.onCreateSubjectClick.bind(this)
@@ -31,16 +27,6 @@ class Index extends React.Component {
     this.onOnlyDirChange = this.onOnlyDirChange.bind(this)
     this.onFollowMoveChange = this.onFollowMoveChange.bind(this)
     this.onTagsChange = this.onTagsChange.bind(this)
-  }
-
-  handleNameChange(event) {
-     this.setState({name: event.target.value})
-    this.props.dispatchSetName(event.target.value)
-  }
-
-  handleNamespaceChange(event) {
-     this.setState({namespace: event.target.value})
-    this.props.dispatchSetNamespace(event.target.value)
   }
 
   onSelectorSubmit(selector) {
@@ -131,26 +117,6 @@ class Index extends React.Component {
         <div className="container">
           <div className="row">
             <div className="column">
-              <label>
-                Name
-                <input type="text"
-                  value={this.state.name}
-                  onChange={this.handleNameChange}
-                  placeholder="mywatcher" />
-              </label>
-            </div>
-            <div className="column">
-              <label>
-                Namespace
-                <input type="text"
-                  value={this.state.namespace}
-                  onChange={this.handleNamespaceChange}
-                  placeholder="mynamespace" />
-              </label>
-            </div>
-          </div>
-          <div className="row">
-            <div className="column">
               <Search onSelectorSubmit={this.onSelectorSubmit}
                 onLoadRootDirectory={this.onLoadRootDirectory} />
             </div>
@@ -174,7 +140,9 @@ class Index extends React.Component {
             <div className="column column-33">
               <div>
                 <div className="watcher-subjects">
-                  <h3>Watcher Subjects</h3>
+                  <h3>
+                    <em>ArgusWatcher</em> Subjects
+                  </h3>
                   {this.props.spec.subjects.map((subject, index) => (
                   <div key={index}
                     onClick={() => this.onSelectSubjectClick(index)}
@@ -196,7 +164,9 @@ class Index extends React.Component {
                   </button>
                 </div>
                 <div className="watcher-options">
-                  <h3>Watcher Options</h3>
+                  <h3>
+                    <em>ArgusWatcher</em> Options
+                  </h3>
                   <WatcherOptions subject={this.getSelectedSubject()}
                     recursive={this.state.spec.recursive}
                     maxDepth={this.state.spec.maxDepth}
