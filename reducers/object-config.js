@@ -1,6 +1,7 @@
 const SET_NAME = 'SET_NAME'
 const SET_NAMESPACE = 'SET_NAMESPACE'
 const CREATE_SUBJECT = 'CREATE_SUBJECT'
+const DELETE_SUBJECT = 'DELETE_SUBJECT'
 const SET_SELECTOR = 'SET_SELECTOR'
 const TOGGLE_EVENT = 'TOGGLE_EVENT'
 const TOGGLE_SUBJECT_PATH = 'TOGGLE_SUBJECT_PATH'
@@ -42,6 +43,12 @@ const reducer = (state = initialState, action) => {
         paths: [],
         events: [],
       }]
+      break
+    case DELETE_SUBJECT:
+      newState.spec.subjects = [
+        ...newState.spec.subjects.slice(0, action.index),
+        ...newState.spec.subjects.slice(action.index + 1)
+      ]
       break
     case SET_SELECTOR:
       let labels = {}
@@ -95,6 +102,7 @@ export default reducer
 export const setName = value => ({type: SET_NAME, key: 'name', value})
 export const setNamespace = value => ({type: SET_NAMESPACE, key: 'namespace', value})
 export const createSubject = () => ({type: CREATE_SUBJECT})
+export const deleteSubject = index => ({type: DELETE_SUBJECT, index})
 export const setSelector = selector => ({type: SET_SELECTOR, selector})
 export const toggleEvent = (subject, value) => ({type: TOGGLE_EVENT, subject, event, key: 'events', value})
 export const toggleSubjectPath = (subject, value) => ({type: TOGGLE_SUBJECT_PATH, subject, key: 'paths', value})
@@ -125,6 +133,7 @@ export const mapDispatch = dispatch => ({
   dispatchSetName: value => dispatch(setName(value)),
   dispatchSetNamespace: value => dispatch(setNamespace(value)),
   dispatchCreateSubject: () => dispatch(createSubject()),
+  dispatchDeleteSubject: index => dispatch(deleteSubject(index)),
   dispatchSetSelector: selector => dispatch(setSelector(selector)),
   toggleEvent: (subject, value) => dispatch(toggleEvent(subject, value)),
   toggleSubjectPath: (subject, value) => dispatch(toggleSubjectPath(subject, value)),

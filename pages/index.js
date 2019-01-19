@@ -1,5 +1,8 @@
 import React from 'react'
 import {connect} from 'react-redux'
+import {Trash2} from 'react-feather'
+import ReactHintFactory from 'react-hint'
+import 'react-hint/css/index.css'
 
 import Layout from '../components/Layout'
 import Search from '../components/Search'
@@ -8,6 +11,8 @@ import WatcherOptions from '../components/WatcherOptions'
 import {mapState as mapSearchState, mapDispatch as mapSearchDispatch} from '../reducers/search'
 import {mapState as mapTreeState, mapDispatch as mapTreeDispatch} from '../reducers/file-tree'
 import {mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
+
+const ReactHint = ReactHintFactory(React)
 
 class Index extends React.Component {
   constructor(props) {
@@ -21,6 +26,7 @@ class Index extends React.Component {
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
     this.onCreateSubjectClick = this.onCreateSubjectClick.bind(this)
     this.onSelectSubjectClick = this.onSelectSubjectClick.bind(this)
+    this.handleDeleteSubjectClick = this.handleDeleteSubjectClick.bind(this)
     this.onIgnoreClick = this.onIgnoreClick.bind(this)
     this.onRecursiveChange = this.onRecursiveChange.bind(this)
     this.onMaxDepthChange = this.onMaxDepthChange.bind(this)
@@ -56,6 +62,13 @@ class Index extends React.Component {
 
   onSelectSubjectClick(index) {
     this.selectSubject(index)
+  }
+
+  handleDeleteSubjectClick(event, index) {
+    event.stopPropagation()
+    this.props.dispatchDeleteSubject(index)
+    this.selectSubject(this.props.selectedSubject -
+      (this.props.selectedSubject > index ? 1 : 0))
   }
 
   selectSubject(index) {
@@ -147,6 +160,14 @@ class Index extends React.Component {
                   <div key={index}
                     onClick={() => this.onSelectSubjectClick(index)}
                     className={`subject ${this.props.selectedSubject === index ? 'active' : ''}`}>
+                    <ReactHint autoPosition
+                      events={{hover: true}} />
+                    {this.props.spec.subjects.length > 1 &&
+                    <div className="delete"
+                      data-rh="Delete subject"
+                      onClick={event => this.handleDeleteSubjectClick(event, index)}>
+                      <i><Trash2 size={18} /></i>
+                    </div>}
                     <div className="title">
                       Subject {index}
                     </div>
@@ -198,6 +219,7 @@ class Index extends React.Component {
         }
 
         .watcher-subjects .subject {
+          position: relative;
           border: 1px solid #c6f7e2;
           border-radius: 0.6rem;
           padding: 1rem 1.5rem;
@@ -209,6 +231,16 @@ class Index extends React.Component {
           color: #000;
           border-width: 2px;
           background-color: #effcf6;
+        }
+
+        .watcher-subjects .subject .delete {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+        }
+
+        .watcher-subjects .subject .delete:hover {
+          color: #7a0ecc;
         }
 
         .watcher-subjects .title {
