@@ -1,6 +1,5 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {Eye} from 'react-feather'
 
 import Layout from '../components/Layout'
 import Search from '../components/Search'
@@ -13,8 +12,15 @@ import {mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../r
 class Index extends React.Component {
   constructor(props) {
     super(props)
-    this.state = this.getSubjectState(this.props.selectedSubject)
+    this.state = {
+      name: this.props.name || '',
+      namespace: this.props.namespace || '',
+      spec: this.getSubjectState(this.props.selectedSubject),
+      isLoading: false,
+    }
 
+    this.handleNameChange = this.handleNameChange.bind(this)
+    this.handleNamespaceChange = this.handleNamespaceChange.bind(this)
     this.onSelectorSubmit = this.onSelectorSubmit.bind(this)
     this.onLoadRootDirectory = this.onLoadRootDirectory.bind(this)
     this.onCreateSubjectClick = this.onCreateSubjectClick.bind(this)
@@ -25,6 +31,16 @@ class Index extends React.Component {
     this.onOnlyDirChange = this.onOnlyDirChange.bind(this)
     this.onFollowMoveChange = this.onFollowMoveChange.bind(this)
     this.onTagsChange = this.onTagsChange.bind(this)
+  }
+
+  handleNameChange(event) {
+     this.setState({name: event.target.value})
+    this.props.dispatchSetName(event.target.value)
+  }
+
+  handleNamespaceChange(event) {
+     this.setState({namespace: event.target.value})
+    this.props.dispatchSetNamespace(event.target.value)
   }
 
   onSelectorSubmit(selector) {
@@ -47,7 +63,7 @@ class Index extends React.Component {
   }
 
   createAndSelectSubject() {
-    const len = this.props.subjects.length
+    const len = this.props.spec.subjects.length
     this.props.dispatchCreateSubject()
     this.selectSubject(len)
   }
@@ -58,11 +74,11 @@ class Index extends React.Component {
 
   selectSubject(index) {
     this.props.dispatchSelectSubject(index)
-    this.setState(this.getSubjectState(index))
+    this.setState({spec: this.getSubjectState(index)})
   }
 
   getSubjectState(index) {
-    const subject = this.props.subjects[index] || {}
+    const subject = this.props.spec.subjects[index] || {}
     const tags = Object.keys(subject.tags || {})
       .map(tag => `${tag}=${subject.tags[tag]}`)
       .join(',')
@@ -83,30 +99,30 @@ class Index extends React.Component {
 
   onRecursiveChange(subject) {
     this.props.toggleRecursive(subject)
-    this.setState({recursive: subject.recursive})
+    this.setState({spec: {...this.state.spec, recursive: subject.recursive}})
   }
 
   onMaxDepthChange(subject, value) {
     this.props.dispatchSetMaxDepth(subject, value)
-    this.setState({maxDepth: value})
+    this.setState({spec: {...this.state.spec, maxDepth: value}})
   }
 
   onOnlyDirChange(subject) {
     this.props.toggleOnlyDir(subject)
-    this.setState({onlyDir: subject.onlyDir})
+    this.setState({spec: {...this.state.spec, onlyDir: subject.onlyDir}})
   }
 
   onFollowMoveChange(subject) {
     this.props.toggleFollowMove(subject)
-    this.setState({followMove: subject.followMove})
+    this.setState({spec: {...this.state.spec, followMove: subject.followMove}})
   }
 
   onTagsChange(tags) {
-    this.setState({tags})
+    this.setState({spec: {...this.state.spec, tags}})
   }
 
   getSelectedSubject() {
-    return this.props.subjects[this.props.selectedSubject]
+    return this.props.spec.subjects[this.props.selectedSubject]
   }
 
   render() {
@@ -114,12 +130,25 @@ class Index extends React.Component {
       <Layout>
         <div className="container">
           <div className="row">
-            <h1>
-              Argus
-              <i className="logo"><Eye size={48} /></i>
-            </h1>
+            <div className="column">
+              <label>
+                Name
+                <input type="text"
+                  value={this.state.name}
+                  onChange={this.handleNameChange}
+                  placeholder="mywatcher" />
+              </label>
+            </div>
+            <div className="column">
+              <label>
+                Namespace
+                <input type="text"
+                  value={this.state.namespace}
+                  onChange={this.handleNamespaceChange}
+                  placeholder="mynamespace" />
+              </label>
+            </div>
           </div>
-
           <div className="row">
             <div className="column">
               <Search onSelectorSubmit={this.onSelectorSubmit}
@@ -137,8 +166,8 @@ class Index extends React.Component {
               </h2>
               <FileTree directory={this.props.directory}
                 subject={this.getSelectedSubject()}
-                recursive={this.state.recursive}
-                maxDepth={this.state.maxDepth}
+                recursive={this.state.spec.recursive}
+                maxDepth={this.state.spec.maxDepth}
                 onIgnoreClick={this.onIgnoreClick} />
             </div>}
             {this.props.selectedSubject !== null &&
@@ -146,7 +175,7 @@ class Index extends React.Component {
               <div>
                 <div className="watcher-subjects">
                   <h3>Watcher Subjects</h3>
-                  {this.props.subjects.map((subject, index) => (
+                  {this.props.spec.subjects.map((subject, index) => (
                   <div key={index}
                     onClick={() => this.onSelectSubjectClick(index)}
                     className={`subject ${this.props.selectedSubject === index ? 'active' : ''}`}>
@@ -169,11 +198,11 @@ class Index extends React.Component {
                 <div className="watcher-options">
                   <h3>Watcher Options</h3>
                   <WatcherOptions subject={this.getSelectedSubject()}
-                    recursive={this.state.recursive}
-                    maxDepth={this.state.maxDepth}
-                    onlyDir={this.state.onlyDir}
-                    followMove={this.state.followMove}
-                    tags={this.state.tags}
+                    recursive={this.state.spec.recursive}
+                    maxDepth={this.state.spec.maxDepth}
+                    onlyDir={this.state.spec.onlyDir}
+                    followMove={this.state.spec.followMove}
+                    tags={this.state.spec.tags}
                     onRecursiveChange={this.onRecursiveChange}
                     onMaxDepthChange={this.onMaxDepthChange}
                     onOnlyDirChange={this.onOnlyDirChange}
@@ -186,11 +215,6 @@ class Index extends React.Component {
         </div>
 
         <style jsx>{`
-        h1 i {
-          vertical-align: sub;
-          margin: 1rem 0 0 1rem;
-        }
-
         .tool-container {
           margin-top: 4rem;
         }
@@ -245,8 +269,6 @@ class Index extends React.Component {
     )
   }
 }
-
-// @TODO: de-uglify this
 
 const mapState = state => (Object.assign({},
   mapSearchState(state),

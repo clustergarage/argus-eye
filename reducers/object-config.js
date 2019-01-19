@@ -1,3 +1,5 @@
+const SET_NAME = 'SET_NAME'
+const SET_NAMESPACE = 'SET_NAMESPACE'
 const CREATE_SUBJECT = 'CREATE_SUBJECT'
 const SET_SELECTOR = 'SET_SELECTOR'
 const TOGGLE_EVENT = 'TOGGLE_EVENT'
@@ -11,20 +13,32 @@ const SET_TAGS = 'SET_TAGS'
 const SET_LOG_FORMAT = 'SET_LOG_FORMAT'
 const CLEAR_CONFIG_STATE = 'CLEAR_CONFIG_STATE'
 
+const API_VERSION = 'arguscontroller.clustergarage.io/v1alpha1'
+const KIND = 'ArgusWatcher'
+
 const initialState = {
-  selector: {
-    matchLabels: {}
-  },
-  subjects: [],
+  apiVersion: API_VERSION,
+  kind: KIND,
+  metadata: {},
+  spec: {
+    selector: {
+      matchLabels: {}
+    },
+    subjects: [],
+  }
 }
 
 const reducer = (state = initialState, action) => {
   const newState = Object.assign({}, state)
-  const index = action.subject && newState.subjects.indexOf(action.subject)
+  const index = action.subject && newState.spec.subjects.indexOf(action.subject)
 
   switch (action.type) {
+    case SET_NAME:
+    case SET_NAMESPACE:
+      newState.metadata[action.key] = action.value
+      break
     case CREATE_SUBJECT:
-      newState.subjects = [...newState.subjects, {
+      newState.spec.subjects = [...newState.spec.subjects, {
         paths: [],
         events: [],
       }]
@@ -32,40 +46,40 @@ const reducer = (state = initialState, action) => {
     case SET_SELECTOR:
       let labels = {}
       action.selector.replace(/([^=\,]+)=([^\,]*)/g, (_, k, v) => labels[k] = v)
-      newState.selector.matchLabels = labels
+      newState.spec.selector.matchLabels = labels
       break
     case TOGGLE_EVENT:
     case TOGGLE_SUBJECT_PATH:
     case TOGGLE_SUBJECT_IGNORE:
-      let arr = newState.subjects[index][action.key] || []
+      let arr = newState.spec.subjects[index][action.key] || []
       const idx = arr.indexOf(action.value)
       if (idx > -1) {
         arr.splice(idx, 1)
       } else {
         arr.push(action.value)
       }
-      newState.subjects = [
-        ...newState.subjects.slice(0, index),
-        newState.subjects[index] = Object.assign({}, newState.subjects[index], {
+      newState.spec.subjects = [
+        ...newState.spec.subjects.slice(0, index),
+        newState.spec.subjects[index] = Object.assign({}, newState.spec.subjects[index], {
           [action.key]: arr,
         }),
-        ...newState.subjects.slice(index + 1),
+        ...newState.spec.subjects.slice(index + 1),
       ]
       break
     case TOGGLE_RECURSIVE:
     case TOGGLE_ONLY_DIR:
     case TOGGLE_FOLLOW_MOVE:
-      newState.subjects[index][action.key] = !newState.subjects[index][action.key]
+      newState.spec.subjects[index][action.key] = !newState.spec.subjects[index][action.key]
       break
     case SET_MAX_DEPTH:
     case SET_TAGS:
-      newState.subjects[index][action.key] = action.value
+      newState.spec.subjects[index][action.key] = action.value
       break
     case SET_LOG_FORMAT:
-      newState.logFormat = action.value
+      newState.spec.logFormat = action.value
       break
     case CLEAR_CONFIG_STATE:
-      Object.assign(newState, {
+      Object.assign(newState.spec, {
         subjects: [],
         logFormat: null,
       })
@@ -78,6 +92,8 @@ const reducer = (state = initialState, action) => {
 
 export default reducer
 
+export const setName = value => ({type: SET_NAME, key: 'name', value})
+export const setNamespace = value => ({type: SET_NAMESPACE, key: 'namespace', value})
 export const createSubject = () => ({type: CREATE_SUBJECT})
 export const setSelector = selector => ({type: SET_SELECTOR, selector})
 export const toggleEvent = (subject, value) => ({type: TOGGLE_EVENT, subject, event, key: 'events', value})
@@ -92,12 +108,18 @@ export const setLogFormat = value => ({type: SET_LOG_FORMAT, value})
 export const clearConfigState = () => ({type: CLEAR_CONFIG_STATE})
 
 export const mapState = state => ({
-  selector: state.objectConfig.selector,
-  subjects: state.objectConfig.subjects,
-  logFormat: state.objectConfig.logFormat,
+  name: state.objectConfig.metadata.name,
+  namespace: state.objectConfig.metadata.namespace,
+  spec: {
+    selector: state.objectConfig.spec.selector,
+    subjects: state.objectConfig.spec.subjects,
+    logFormat: state.objectConfig.spec.logFormat,
+  },
 })
 
 export const mapDispatch = dispatch => ({
+  dispatchSetName: value => dispatch(setName(value)),
+  dispatchSetNamespace: value => dispatch(setNamespace(value)),
   dispatchCreateSubject: () => dispatch(createSubject()),
   dispatchSetSelector: selector => dispatch(setSelector(selector)),
   toggleEvent: (subject, value) => dispatch(toggleEvent(subject, value)),

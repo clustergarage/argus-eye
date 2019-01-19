@@ -3,16 +3,16 @@ import Header from './Header'
 import 'milligram/dist/milligram.css'
 import '../styles/style.css'
 
-const layoutStyle = {
-  margin: 20,
-  //padding: 20,
-  //border: '1px solid #ddd',
-}
-
 const Layout = (props) => (
-  <div style={layoutStyle}>
-    {/*<Header />*/}
+  <div className="layout">
+    {<Header />}
     {props.children}
+
+    <style jsx>{`
+    .layout {
+      margin: 2rem;
+    }
+    `}</style>
   </div>
 )
 

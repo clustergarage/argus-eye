@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
 
+input[type="text"]::placeholder {
+  color: #bcccdc;
+  font-style: italic;
+}
+
+.button:focus {
+  background-color: #9b4dca;
+  border-color: #9b4dca;
+}
+
 .file-path i {
   margin-right: 1rem;
   cursor: pointer;
@@ -33,9 +43,4 @@
   color: #dac4ff;
   font-style: normal;
   vertical-align: inherit;
-}
-
-.button:focus {
-  background-color: #9b4dca;
-  border-color: #9b4dca;
 }

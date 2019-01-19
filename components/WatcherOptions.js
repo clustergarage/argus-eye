@@ -16,8 +16,8 @@ class WatcherOptions extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      tags: this.props.tags || '',
-      logFormat: this.props.logFormat || '',
+      tags: this.props.spec.tags || '',
+      logFormat: this.props.spec.logFormat || '',
       showSpecifiers: false,
     }
 
@@ -299,11 +299,6 @@ class WatcherOptions extends React.Component {
           background-color: #c6f7e2;
           font-style: normal;
           padding: 0.1rem 0.2rem;
-        }
-
-        input[type="text"]::placeholder {
-          color: #bcccdc;
-          font-style: italic;
         }
 
         .button {

@@ -83,7 +83,8 @@ class Search extends React.Component {
             Label selector
             <input type="text"
               value={this.state.labelSelector}
-              onChange={this.handleLabelSelectorChange} />
+              onChange={this.handleLabelSelectorChange}
+              placeholder="app=myapp" />
           </label>
           <input type="submit" value="Submit" />
         </form>
