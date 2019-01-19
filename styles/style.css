@@ -59,3 +59,18 @@ input[type="text"]::placeholder {
 .copy-clipboard:hover i {
   color: #7a0ecc;
 }
+
+.output-syntax pre,
+.output-syntax code {
+  background-color: transparent;
+}
+
+.react-hint::after {
+  border-top-color: #334E68;
+}
+
+.react-hint__content {
+  font: 1.2rem 'Ubuntu Mono', monospace;
+  background-color: #334E68;
+  white-space: nowrap;
+}

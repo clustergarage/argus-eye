@@ -1,20 +1,33 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import Clipboard from 'react-clipboard.js'
 import download from 'downloadjs'
+import Clipboard from 'react-clipboard.js'
+import {Box, Copy, Download} from 'react-feather'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import {github} from 'react-syntax-highlighter/dist/styles/hljs'
-import {Box, Copy, Download} from 'react-feather'
+import ReactHintFactory from 'react-hint'
+import 'react-hint/css/index.css'
 
 import Layout from '../components/Layout'
 import {json2yaml} from '../lib/json2yaml'
 
+const ReactHint = ReactHintFactory(React)
+const COPY_TOOLTIP = 'Copy to clipboard.'
+const COPIED_TOOLTIP = 'Copied to clipboard!'
+
 class ObjectConfig extends React.Component {
   constructor(props) {
     super(props)
+    this.state = {
+      tooltip: {
+        json: COPY_TOOLTIP,
+        yaml: COPY_TOOLTIP,
+      },
+    }
 
     this.handleDownloadClick = this.handleDownloadClick.bind(this)
     this.handleDeployToClusterClick = this.handleDeployToClusterClick.bind(this)
+    this.handleTooltipClick = this.handleTooltipClick.bind(this)
   }
 
   handleDownloadClick(event) {
@@ -25,6 +38,12 @@ class ObjectConfig extends React.Component {
 
   handleDeployToClusterClick(event) {
     const json = this.getObjectConfigJSON()
+  }
+
+  handleTooltipClick(key) {
+    let tooltip = this.state.tooltip
+    Object.keys(tooltip).map(k => tooltip[k] = key === k ? COPIED_TOOLTIP : COPY_TOOLTIP)
+    this.setState({tooltip})
   }
 
   getObjectConfigJSON() {
@@ -73,11 +92,17 @@ class ObjectConfig extends React.Component {
             <div className="column">
               <h3>YAML</h3>
               <div className="output-syntax">
-                <Clipboard component="span"
-                  data-clipboard-text={yamlFormatted}
-                  className="copy-clipboard">
-                  <i><Copy size={18} /></i>
-                </Clipboard>
+                <ReactHint attribute="data-yaml"
+                  position="top"
+                  events={{hover: true}} />
+                <div className="copy-clipboard"
+                  data-yaml={this.state.tooltip.yaml}
+                  onClick={() => this.handleTooltipClick('yaml')}>
+                  <Clipboard component="div"
+                    data-clipboard-text={yamlFormatted}>
+                    <i><Copy size={18} /></i>
+                  </Clipboard>
+                </div>
                 <SyntaxHighlighter language="yaml" style={github}>
                   {yamlFormatted}
                 </SyntaxHighlighter>
@@ -86,11 +111,17 @@ class ObjectConfig extends React.Component {
             <div className="column">
               <h3>JSON</h3>
               <div className="output-syntax">
-                <Clipboard component="span"
-                  data-clipboard-text={jsonFormatted}
-                  className="copy-clipboard">
-                  <i><Copy size={18} /></i>
-                </Clipboard>
+                <ReactHint attribute="data-json"
+                  position="top"
+                  events={{hover: true}} />
+                <div className="copy-clipboard"
+                  data-json={this.state.tooltip.json}
+                  onClick={() => this.handleTooltipClick('json')}>
+                  <Clipboard component="div"
+                    data-clipboard-text={jsonFormatted}>
+                    <i><Copy size={18} /></i>
+                  </Clipboard>
+                </div>
                 <SyntaxHighlighter language="json" style={github}>
                   {jsonFormatted}
                 </SyntaxHighlighter>
@@ -102,10 +133,6 @@ class ObjectConfig extends React.Component {
         <style jsx>{`
         .output-syntax {
           position: relative;
-        }
-
-        .output-syntax code {
-          background-color: transparent;
         }
 
         .buttons {

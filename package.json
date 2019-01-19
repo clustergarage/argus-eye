@@ -9,8 +9,8 @@
     "start": "cross-env NODE_ENV=production node server.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Brett Fowle <brettfowle@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "@kubernetes/client-node": "^0.7.2",
     "@zeit/next-css": "^1.0.1",
@@ -27,6 +27,7 @@
     "react-clipboard.js": "^2.0.2",
     "react-dom": "^16.7.0",
     "react-feather": "^1.1.5",
+    "react-hint": "^3.2.0",
     "react-redux": "^6.0.0",
     "react-syntax-highlighter": "^10.1.2",
     "redux": "^4.0.1",
