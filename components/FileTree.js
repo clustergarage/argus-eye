@@ -26,7 +26,8 @@ class FileTree extends React.Component {
       files: newFiles,
     } = this.props
 
-    if ((newDirectory && newDirectory !== directory) ||
+    if ((newDirectory &&
+      newDirectory !== directory) ||
       (newFiles && newFiles !== files)) {
       this.loadDirectory()
     }
@@ -56,6 +57,11 @@ class FileTree extends React.Component {
     this.props.onFileClick && this.props.onFileClick(file)
   }
 
+  isIgnored(file) {
+    return (this.props.subject.ignore || [])
+      .indexOf(file.name) > -1
+  }
+
   render() {
     return (
       this.state.files.length > 0 &&
@@ -70,7 +76,9 @@ class FileTree extends React.Component {
             onDirectoryClick={this.onDirectoryClick}
             onFileClick={this.onFileClick}
             isVisible={this.props.isVisible[file.path]} />
-          {(file.isDirectory && this.props.isVisible[file.path]) &&
+          {(file.isDirectory &&
+          this.props.isVisible[file.path] &&
+          !this.isIgnored(file)) &&
           <FileTree directory={file.path}
             files={file.files}
             subject={this.props.subject}
