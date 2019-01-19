@@ -1,6 +1,10 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {Copy} from 'react-feather'
+import Clipboard from 'react-clipboard.js'
+import download from 'downloadjs'
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import {github} from 'react-syntax-highlighter/dist/styles/hljs'
+import {Box, Copy, Download} from 'react-feather'
 
 import Layout from '../components/Layout'
 import {json2yaml} from '../lib/json2yaml'
@@ -8,57 +12,124 @@ import {json2yaml} from '../lib/json2yaml'
 class ObjectConfig extends React.Component {
   constructor(props) {
     super(props)
+
+    this.handleDownloadClick = this.handleDownloadClick.bind(this)
+    this.handleDeployToClusterClick = this.handleDeployToClusterClick.bind(this)
+  }
+
+  handleDownloadClick(event) {
+    download(json2yaml(this.getObjectConfigJSON()),
+      `${this.props.objectConfig.metadata.name}-argus-watcher.yaml`,
+      'text/x-yaml')
+  }
+
+  handleDeployToClusterClick(event) {
+    const json = this.getObjectConfigJSON()
+  }
+
+  getObjectConfigJSON() {
+    const json = (this.props.objectConfig || {})
+
+    const removeEmpty = obj => {
+      Object.keys(obj).forEach(key => {
+        if (obj[key] &&
+          typeof obj[key] === 'object') {
+          removeEmpty(obj[key])
+        } else if (obj[key] === null) {
+          delete obj[key]
+        }
+      })
+    }
+
+    removeEmpty(json)
+    return json
   }
 
   render() {
-    const json = (this.props.objectConfig || {})
-    Object.keys(json).forEach(key => json[key] === null && delete json[key])
-    const yaml = json2yaml(json)
+    const json = this.getObjectConfigJSON()
+    const jsonFormatted = JSON.stringify(json, null, 2)
+    const yamlFormatted = json2yaml(json)
 
     return (
       <Layout>
         <div className="container">
           <div className="row">
+            <div className="column buttons">
+              <button type="button"
+                className="button"
+                onClick={this.handleDownloadClick}>
+                <i><Download size={18} /></i>
+                Download
+              </button>
+              <button type="button"
+                className="button"
+                onClick={this.handleDeployToClusterClick}>
+                <i><Box size={18} /></i>
+                Deploy to cluster
+              </button>
+            </div>
+          </div>
+          <div className="row">
             <div className="column">
               <h3>YAML</h3>
-              <pre>
-                <div className="copy">
+              <div className="output-syntax">
+                <Clipboard component="span"
+                  data-clipboard-text={yamlFormatted}
+                  className="copy-clipboard">
                   <i><Copy size={18} /></i>
-                </div>
-                {yaml}
-              </pre>
+                </Clipboard>
+                <SyntaxHighlighter language="yaml" style={github}>
+                  {yamlFormatted}
+                </SyntaxHighlighter>
+              </div>
             </div>
             <div className="column">
               <h3>JSON</h3>
-              <pre>
-                <div className="copy">
+              <div className="output-syntax">
+                <Clipboard component="span"
+                  data-clipboard-text={jsonFormatted}
+                  className="copy-clipboard">
                   <i><Copy size={18} /></i>
-                </div>
-                {JSON.stringify(json, null, 2)}
-              </pre>
+                </Clipboard>
+                <SyntaxHighlighter language="json" style={github}>
+                  {jsonFormatted}
+                </SyntaxHighlighter>
+              </div>
             </div>
           </div>
         </div>
 
         <style jsx>{`
-        pre {
+        .output-syntax {
           position: relative;
-          padding: 2rem;
         }
 
-        pre .copy {
-          position: absolute;
-          top: 0.6rem;
-          right: 0.75rem;
+        .output-syntax code {
+          background-color: transparent;
         }
 
-        pre .copy i {
-          color: #a368fc;
-          cursor: pointer;
+        .buttons {
+          border-bottom: 2px solid #d9e2ec;
+          margin-bottom: 2rem;
+          padding-bottom: 2rem;
         }
 
-        pre .copy:hover i {
-          color: #7a0ecc;
+        .button {
+          /*color: #000;
+          background-color: #c6f7e2;
+          border-color: #c6f7e2;*/
+          margin-right: 1rem;
+        }
+
+        .button:hover {
+          /*color: #fff;
+          background-color: #606c76;
+          border-color: #606c76;*/
+        }
+
+        .button i {
+          vertical-align: sub;
+          margin-right: 1rem;
         }
         `}</style>
       </Layout>
