@@ -18,7 +18,7 @@ import {json2yaml} from '../lib/json2yaml'
 import {mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
 
 const ReactHint = ReactHintFactory(React)
-const COPY_TOOLTIP = (<span>Copy to clipboard.</span>)
+const COPY_TOOLTIP = (<span>Copy to clipboard</span>)
 const COPIED_TOOLTIP = (<span><b>Copied</b> to clipboard!</span>)
 
 class ExportConfig extends React.Component {
@@ -118,21 +118,40 @@ class ExportConfig extends React.Component {
   }
 
   getObjectConfigJSON() {
-    const json = (this.props.objectConfig || {})
+    let json = (this.props.objectConfig || {})
 
     const removeEmpty = obj => {
       Object.keys(obj).forEach(key => {
         if (obj[key] &&
           typeof obj[key] === 'object') {
           removeEmpty(obj[key])
-        } else if (obj[key] === null) {
+        } else if (obj[key] === undefined ||
+          obj[key] === null) {
           delete obj[key]
         }
       })
     }
 
+    const defaultSortFn = (a, b) => a.localeCompare(b)
+    const deepSort = (src, comparator) => {
+      let out
+      if (Array.isArray(src)) {
+        return src.map(item => deepSort(item, comparator))
+          .sort(comparator)
+      }
+
+      if (require('is-plain-object')(src)) {
+        out = {}
+        Object.keys(src)
+          .sort(comparator || defaultSortFn)
+          .forEach(key => out[key] = deepSort(src[key], comparator))
+        return out
+      }
+      return src
+    }
+
     removeEmpty(json)
-    return json
+    return deepSort(json)
   }
 
   render() {

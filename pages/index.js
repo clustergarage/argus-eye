@@ -200,14 +200,14 @@ class Index extends React.Component {
         .watcher-subjects .subject {
           border: 1px solid #c6f7e2;
           border-radius: 0.6rem;
-          padding: 1rem;
+          padding: 1rem 1.5rem;
           margin-bottom: 1rem;
           cursor: pointer;
         }
 
         .watcher-subjects .subject.active {
           color: #000;
-          border-width: 3px;
+          border-width: 2px;
           background-color: #effcf6;
         }
 

@@ -93,7 +93,11 @@ class Search extends React.Component {
         <label className="found-pods">
           Found <em>{this.props.pods.length}</em> pod{this.props.pods.length !== 1 && 's'}
           <div>
-            {this.props.pods.map(pod => <a key={pod.metadata.uid}>{pod.metadata.name}</a>)}
+            {this.props.pods.map(pod => (
+              <a key={pod.metadata.uid}>
+                {pod.metadata.namespace}/{pod.metadata.name}
+              </a>
+            ))}
           </div>
         </label>}
 
