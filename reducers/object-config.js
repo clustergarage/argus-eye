@@ -108,8 +108,12 @@ export const setLogFormat = value => ({type: SET_LOG_FORMAT, value})
 export const clearConfigState = () => ({type: CLEAR_CONFIG_STATE})
 
 export const mapState = state => ({
-  name: state.objectConfig.metadata.name,
-  namespace: state.objectConfig.metadata.namespace,
+  apiVersion: state.objectConfig.apiVersion,
+  kind: state.objectConfig.kind,
+  metadata: {
+    name: state.objectConfig.metadata.name,
+    namespace: state.objectConfig.metadata.namespace,
+  },
   spec: {
     selector: state.objectConfig.spec.selector,
     subjects: state.objectConfig.spec.subjects,

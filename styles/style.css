@@ -18,6 +18,17 @@ h4 em {
   border-color: #9b4dca;
 }
 
+label small {
+  font: 1.2rem 'Ubuntu Mono', monospace;
+}
+
+label em {
+  color: #000;
+  background-color: #c6f7e2;
+  font-style: normal;
+  padding: 0.1rem 0.2rem;
+}
+
 .file-path i {
   margin-right: 1rem;
   cursor: pointer;
@@ -53,6 +64,32 @@ h4 em {
   vertical-align: inherit;
 }
 
+.required blockquote {
+  font-family: 'Ubuntu Mono', monospace;
+  background-color: #f7f8fa;
+  border-left-color: #e12d39;
+  padding: 2rem;
+}
+
+.required blockquote h5 i {
+  color: #cf1124;
+  vertical-align: sub;
+  margin-right: 1rem;
+}
+
+.required li {
+  list-style: disc;
+  margin: 0 0 0.25rem 2rem;
+  padding-left: 1rem;
+}
+
+.required li em {
+  color: #000;
+  background-color: #ffe3e3;
+  font-style: normal;
+  padding: 0.2rem 0.4rem;
+}
+
 .copy-clipboard {
   position: absolute;
   top: 0.6rem;
@@ -78,11 +115,11 @@ h4 em {
 }
 
 .react-hint::after {
-  border-top-color: #334E68;
+  border-top-color: #243b53;
 }
 
 .react-hint__content {
   font: 1.2rem 'Ubuntu Mono', monospace;
-  background-color: #334E68;
+  background-color: #243b53;
   white-space: nowrap;
 }

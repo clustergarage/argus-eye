@@ -158,6 +158,7 @@ class WatcherOptions extends React.Component {
         <form>
           <label>
             Events&nbsp;
+            <small>(required)</small><br />
             <small>(<em>*</em> denotes a combined event)</small>
           </label>
           <div className="events">
@@ -173,6 +174,7 @@ class WatcherOptions extends React.Component {
 
           <label>
             Paths&nbsp;
+            <small>(required)</small>&nbsp;
             <small>(<em>{getSelectedPaths().length}</em> selected)</small>
             {getSelectedPaths().length > 0 &&
             <ul className="paths">
@@ -290,17 +292,6 @@ class WatcherOptions extends React.Component {
         </form>
 
         <style jsx>{`
-        label small {
-          font: 1.2rem 'Ubuntu Mono', monospace;
-        }
-
-        label em {
-          color: #000;
-          background-color: #c6f7e2;
-          font-style: normal;
-          padding: 0.1rem 0.2rem;
-        }
-
         .button {
           margin: 0 0.5rem 0.5rem 0;
         }

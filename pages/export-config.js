@@ -2,7 +2,12 @@ import React from 'react'
 import {connect} from 'react-redux'
 import download from 'downloadjs'
 import Clipboard from 'react-clipboard.js'
-import {Box, Copy, Download} from 'react-feather'
+import {
+  AlertTriangle,
+  Box,
+  Copy,
+  Download,
+} from 'react-feather'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import {github} from 'react-syntax-highlighter/dist/styles/hljs'
 import ReactHintFactory from 'react-hint'
@@ -20,8 +25,8 @@ class ExportConfig extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      name: this.props.objectConfig.name || '',
-      namespace: this.props.objectConfig.namespace || '',
+      name: this.props.objectConfig.metadata.name || '',
+      namespace: this.props.objectConfig.metadata.namespace || '',
       tooltip: {
         json: COPY_TOOLTIP,
         yaml: COPY_TOOLTIP,
@@ -35,6 +40,46 @@ class ExportConfig extends React.Component {
     this.handleTooltipClick = this.handleTooltipClick.bind(this)
     this.handleTooltipLeave = this.handleTooltipLeave.bind(this)
     this.onRenderTooltipContent = this.onRenderTooltipContent.bind(this)
+  }
+
+  checkIsDisabled() {
+    const {metadata, spec} = this.props.objectConfig
+    const subjects = spec.subjects || []
+    let subjectsOK = subjects.length > 0
+    for (let i = 0; i < subjects.length; ++i) {
+      if (!subjects[i].paths.length ||
+        !subjects[i].events.length) {
+        subjectsOK = false
+        break
+      }
+    }
+    return !metadata.name || !subjectsOK
+  }
+
+  getRequiredFields() {
+    const {metadata, spec} = this.props.objectConfig
+    let required = []
+
+    if (!metadata.name) {
+      required.push(<span><em>Metadata</em> &mdash; <b>name</b> is required.</span>)
+    }
+    if (!Object.keys(spec.selector.matchLabels).length) {
+      required.push(<span><em>Spec</em> &mdash; label <b>selector</b> is required.</span>)
+    }
+    if (!spec.subjects.length) {
+      required.push(<span><em>Spec</em> &mdash; at least one <b>subject</b> is required.</span>)
+    }
+
+    const subjects = spec.subjects || []
+    for (let i = 0; i < subjects.length; ++i) {
+      if (!subjects[i].paths.length) {
+        required.push(<span><em>Subject {i}</em> &mdash; at least one <b>path</b> is required.</span>)
+      }
+      if (!subjects[i].events.length) {
+        required.push(<span><em>Subject {i}</em> &mdash; at least one <b>event</b> is required.</span>)
+      }
+    }
+    return required
   }
 
   handleNameChange(event) {
@@ -108,7 +153,8 @@ class ExportConfig extends React.Component {
           <div className="row">
             <div className="column">
               <label>
-                Name
+                Name&nbsp;
+                <small>(required)</small>
                 <input type="text"
                   value={this.state.name}
                   onChange={this.handleNameChange}
@@ -125,16 +171,34 @@ class ExportConfig extends React.Component {
               </label>
             </div>
           </div>
+          {this.checkIsDisabled() &&
+          <div className="row">
+            <div className="column required">
+              <blockquote>
+                <h5>
+                  <i><AlertTriangle size={24} /></i>
+                  Required fields
+                 </h5>
+                <ul>
+                  {this.getRequiredFields().map((required, index) => (
+                    <li key={index}>{required}</li>)
+                  )}
+                </ul>
+              </blockquote>
+            </div>
+          </div>}
           <div className="row">
             <div className="column buttons">
               <button type="button"
                 className="button"
+                disabled={this.checkIsDisabled()}
                 onClick={this.handleDownloadClick}>
                 <i><Download size={18} /></i>
                 Download
               </button>
               <button type="button"
                 className="button"
+                disabled={this.checkIsDisabled()}
                 onClick={this.handleDeployToClusterClick}>
                 <i><Box size={18} /></i>
                 Deploy to cluster
@@ -188,10 +252,6 @@ class ExportConfig extends React.Component {
         </div>
 
         <style jsx>{`
-        .output-syntax {
-          position: relative;
-        }
-
         .buttons {
           border-bottom: 2px solid #d9e2ec;
           margin-bottom: 2rem;
@@ -199,21 +259,16 @@ class ExportConfig extends React.Component {
         }
 
         .button {
-          /*color: #000;
-          background-color: #c6f7e2;
-          border-color: #c6f7e2;*/
           margin-right: 1rem;
-        }
-
-        .button:hover {
-          /*color: #fff;
-          background-color: #606c76;
-          border-color: #606c76;*/
         }
 
         .button i {
           vertical-align: sub;
           margin-right: 1rem;
+        }
+
+        .output-syntax {
+          position: relative;
         }
         `}</style>
       </Layout>
