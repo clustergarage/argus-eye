@@ -296,13 +296,6 @@ class WatcherOptions extends React.Component {
           margin: 0 0.5rem 0.5rem 0;
         }
 
-        .button.button-small {
-          height: 2.8rem;
-          font-size: 0.8rem;
-          line-height: 2.8rem;
-          padding: 0 1.5rem;
-        }
-
         .events {
           margin-bottom: 2rem;
         }

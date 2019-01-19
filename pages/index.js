@@ -180,7 +180,7 @@ class Index extends React.Component {
                   ))}
                   <button type="button"
                     onClick={this.onCreateSubjectClick}
-                    className="button button-small create-subject">
+                    className="button create-subject">
                     Create subject
                   </button>
                 </div>
@@ -207,7 +207,9 @@ class Index extends React.Component {
 
         <style jsx>{`
         .tool-container {
-          margin-top: 4rem;
+          border-top: 2px solid #d9e2ec;
+          margin-top: 3rem;
+          padding-top: 3rem;
         }
 
         .file-viewer h2 small {

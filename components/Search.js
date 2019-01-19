@@ -95,7 +95,8 @@ class Search extends React.Component {
           <div>
             {this.props.pods.map(pod => (
               <a key={pod.metadata.uid}>
-                {pod.metadata.namespace}/{pod.metadata.name}
+                <span>{pod.metadata.namespace}/</span>
+                {pod.metadata.name}
               </a>
             ))}
           </div>
@@ -103,10 +104,13 @@ class Search extends React.Component {
 
         {this.props.containers.length > 0 &&
         <div className="container-select">
+          <label>
+            Pod has <em>{this.props.containers.length}</em> containers; choose to view filesystem
+          </label>
           <i><CornerDownRight size={28} /></i>
           {this.props.containers.map(container => (
             <a key={container.containerID}
-              className={`button ${this.props.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
+              className={`button button-small ${this.props.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
               onClick={() => this.handleContainerClick(container.containerID)}>
               {container.name}
             </a>
@@ -139,10 +143,18 @@ class Search extends React.Component {
           }
 
           .found-pods a {
-            color: #627d98;
+            color: #486581;
             font: 1.4rem 'Ubuntu Mono', monospace;
             font-weight: normal;
-            margin-right: 3rem;
+            margin-right: 4rem;
+          }
+
+          .found-pods a span {
+            color: #9fb3c8;
+          }
+
+          .container-select {
+            margin-top: 2rem;
           }
 
           .container-select i {
