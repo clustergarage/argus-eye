@@ -9,3 +9,15 @@ export const formatLabels = obj => {
     .map(key => `${key}=${obj[key]}`)
     .join(',')
 }
+
+export const tagsToObject = tags => {
+  const arr = tags.split(',')
+  let obj = {}
+  for (let i = 0; i < arr.length; ++i) {
+    let [key, value] = arr[i].split('=')
+    if (key && value) {
+      obj[key] = value
+    }
+  }
+  return obj
+}

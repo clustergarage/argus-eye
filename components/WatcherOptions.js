@@ -11,12 +11,13 @@ import {
 } from 'react-feather'
 
 import {mapState, mapDispatch} from '../reducers/object-config'
+import {formatLabels, tagsToObject} from '../util/util'
 
 class WatcherOptions extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      tags: this.props.spec.tags || '',
+      tags: formatLabels(this.props.subject.tags || {}),
       logFormat: this.props.spec.logFormat || '',
       showSpecifiers: false,
     }
@@ -30,13 +31,6 @@ class WatcherOptions extends React.Component {
     this.handleLogFormatChange = this.handleLogFormatChange.bind(this)
     this.toggleSpecifiers = this.toggleSpecifiers.bind(this)
     this.insertSpecifier = this.insertSpecifier.bind(this)
-  }
-
-  componentDidUpdate({tags: prevTags}) {
-    const {tags} = this.props
-    if (tags !== prevTags) {
-      this.setState({tags})
-    }
   }
 
   handleEventChange(event) {
@@ -60,18 +54,6 @@ class WatcherOptions extends React.Component {
   }
 
   handleTagsChange(event) {
-    const tagsToObject = tags => {
-      const arr = tags.split(',')
-      let obj = {}
-      for (let i = 0; i < arr.length; ++i) {
-        let [key, value] = arr[i].split('=')
-        if (key && value) {
-          obj[key] = value
-        }
-      }
-      return obj
-    }
-
     const oldTags = tagsToObject(this.state.tags)
     const newTags = tagsToObject(event.target.value)
     this.setState({tags: event.target.value})

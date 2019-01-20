@@ -1,5 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux'
+import yaml from 'js-yaml'
 import download from 'downloadjs'
 import Clipboard from 'react-clipboard.js'
 import {
@@ -12,7 +13,6 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import {github} from 'react-syntax-highlighter/dist/styles/hljs'
 import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
-import yaml from 'js-yaml'
 
 import {mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
 import {applyArgusWatcher} from '../lib/api'
@@ -20,6 +20,7 @@ import {applyArgusWatcher} from '../lib/api'
 const ReactHint = ReactHintFactory(React)
 const COPY_TOOLTIP = (<span>Copy to clipboard</span>)
 const COPIED_TOOLTIP = (<span><b>Copied</b> to clipboard!</span>)
+const YAML_MIME = 'text/x-yaml'
 
 class ExportConfig extends React.Component {
   constructor(props) {
@@ -93,9 +94,9 @@ class ExportConfig extends React.Component {
   }
 
   handleDownloadClick() {
-    download(yaml.safeDump(this.getObjectConfigJSON()),
-      `${this.props.objectConfig.metadata.name}-argus-watcher.yaml`,
-      'text/x-yaml')
+    const json = this.getObjectConfigJSON()
+    const yaml = this.getObjectConfigYAML(json)
+    download(yaml, `${this.props.objectConfig.metadata.name}-argus-watcher.yaml`, YAML_MIME)
   }
 
   async handleDeployToClusterClick() {
@@ -124,12 +125,17 @@ class ExportConfig extends React.Component {
     let json = (this.props.objectConfig || {})
 
     const removeEmpty = obj => {
+      const BOOLEAN_FLAGS = ['recursive', 'onlyDir', 'followMove']
       Object.keys(obj).forEach(key => {
         if (obj[key] &&
           typeof obj[key] === 'object') {
           removeEmpty(obj[key])
         } else if (obj[key] === undefined ||
           obj[key] === null) {
+          delete obj[key]
+        } else if (BOOLEAN_FLAGS.indexOf(key) > -1 &&
+          obj[key] === false) {
+          // keep config minimal by removing `false` value boolean flags
           delete obj[key]
         }
       })
@@ -157,10 +163,17 @@ class ExportConfig extends React.Component {
     return deepSort(json)
   }
 
+  getObjectConfigYAML(json) {
+    return yaml.safeDump(json, {
+      noArrayIndent: true,
+      sortKeys: true,
+    })
+  }
+
   render() {
     const json = this.getObjectConfigJSON()
     const jsonFormatted = JSON.stringify(json, null, 2)
-    const yamlFormatted = yaml.safeDump(json)
+    const yamlFormatted = this.getObjectConfigYAML(json)
 
     return (
       <div className="container">

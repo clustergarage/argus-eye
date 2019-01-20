@@ -85,8 +85,11 @@ const reducer = (state = initialState, action) => {
       newState.spec.subjects[index][action.key] = !newState.spec.subjects[index][action.key]
       break
     case SET_MAX_DEPTH:
+      newState.spec.subjects[index].maxDepth = action.value !== '' ?
+        parseInt(action.value, 10) : undefined
+      break
     case SET_TAGS:
-      newState.spec.subjects[index][action.key] = action.value
+      newState.spec.subjects[index].tags = action.value
       break
     case SET_LOG_FORMAT:
       newState.spec.logFormat = action.value
@@ -116,8 +119,8 @@ export const toggleSubjectIgnore = (subject, value) => ({type: TOGGLE_SUBJECT_IG
 export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject, key: 'recursive'})
 export const toggleOnlyDir = subject => ({type: TOGGLE_ONLY_DIR, subject, key: 'onlyDir'})
 export const toggleFollowMove = subject => ({type: TOGGLE_FOLLOW_MOVE, subject, key: 'followMove'})
-export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, key: 'maxDepth', value})
-export const setTags = (subject, value) => ({type: SET_TAGS, subject, key: 'tags', value})
+export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, value})
+export const setTags = (subject, value) => ({type: SET_TAGS, subject, value})
 export const setLogFormat = value => ({type: SET_LOG_FORMAT, value})
 export const clearConfigState = () => ({type: CLEAR_CONFIG_STATE})
 
