@@ -197,7 +197,7 @@ class ExportConfig extends React.Component {
           <div className="column required">
             <blockquote>
               <h5>
-                <i><AlertTriangle size={24} /></i>
+                <i><AlertTriangle size={22} /></i>
                 Required fields
                 </h5>
               <ul>

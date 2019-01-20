@@ -13,9 +13,12 @@ class ArgusTool extends App {
     const dispatch = mapDispatch(ctx.store.dispatch)
     const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {}
 
-    // get list of watchers and store
-    const watchers = await listArgusWatchers(ctx.req)
-    await dispatch.dispatchSetWatchers(watchers)
+    // only load on server-side
+    if (ctx.req) {
+      // get list of watchers and store
+      const watchers = await listArgusWatchers(ctx.req)
+      await dispatch.dispatchSetWatchers(watchers)
+    }
 
     return {pageProps}
   }

@@ -133,6 +133,10 @@ table td label.option i svg polyline {
   padding: 2rem;
 }
 
+.required blockquote h5 {
+  font-size: 1.6rem;
+}
+
 .required blockquote h5 i {
   color: #cf1124;
   vertical-align: sub;
@@ -140,13 +144,14 @@ table td label.option i svg polyline {
   margin-right: 1rem;
 }
 
-.required li {
+.required blockquote li {
+  font-size: 1.4rem;
   list-style: disc;
   margin: 0 0 0.25rem 2rem;
   padding-left: 1rem;
 }
 
-.required li em {
+.required blockquote li em {
   color: #000;
   background-color: #ffe3e3;
   font-style: normal;
