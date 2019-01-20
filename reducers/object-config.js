@@ -14,13 +14,19 @@ const SET_TAGS = 'SET_TAGS'
 const SET_LOG_FORMAT = 'SET_LOG_FORMAT'
 const CLEAR_CONFIG_STATE = 'CLEAR_CONFIG_STATE'
 
+const VERSION = 'v0.1.0'
 const API_VERSION = 'arguscontroller.clustergarage.io/v1alpha1'
 const KIND = 'ArgusWatcher'
 
 const initialState = {
   apiVersion: API_VERSION,
   kind: KIND,
-  metadata: {},
+  metadata: {
+    annotations: {
+      'clustergarage.io/created-by': 'argus-eye',
+      'clustergarage.io/argus-eye.version': VERSION,
+    }
+  },
   spec: {
     selector: {
       matchLabels: {}
@@ -119,6 +125,7 @@ export const mapState = state => ({
   apiVersion: state.objectConfig.apiVersion,
   kind: state.objectConfig.kind,
   metadata: {
+    annotations: state.objectConfig.metadata.annotations,
     name: state.objectConfig.metadata.name,
     namespace: state.objectConfig.metadata.namespace,
   },
