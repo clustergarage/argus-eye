@@ -5,26 +5,28 @@ import withRedux from 'next-redux-wrapper'
 
 import Layout from '../components/Layout'
 import {initializeStore} from '../store/store'
+import {mapDispatch} from '../reducers/watchers'
 import {listArgusWatchers} from '../lib/api'
 
 class ArgusTool extends App {
   static async getInitialProps({Component, ctx}) {
+    const dispatch = mapDispatch(ctx.store.dispatch)
     const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {}
+
+    // get list of watchers and store
     const watchers = await listArgusWatchers(ctx.req)
-    return {
-      pageProps,
-      watchers,
-    }
+    await dispatch.dispatchSetWatchers(watchers)
+
+    return {pageProps}
   }
 
   render() {
-    const {Component, pageProps, store, watchers} = this.props
-    let passProps = {...pageProps, watchers}
+    const {Component, pageProps, store} = this.props
     return (
       <Container>
         <Provider store={store}>
-          <Layout {...passProps}>
-            <Component {...passProps} />
+          <Layout {...pageProps}>
+            <Component {...pageProps} />
           </Layout>
         </Provider>
       </Container>
@@ -32,4 +34,4 @@ class ArgusTool extends App {
   }
 }
 
-export default withRedux(initializeStore)(ArgusTool)
+export default withRedux(initializeStore/*, {debug: true}*/)(ArgusTool)

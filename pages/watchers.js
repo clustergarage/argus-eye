@@ -3,13 +3,10 @@ import Moment from 'react-moment'
 import {connect} from 'react-redux'
 import {Check, CheckSquare, ChevronRight} from 'react-feather'
 
+import {mapState, mapDispatch} from '../reducers/watchers'
 import {formatLabels} from '../util/util'
 
 class Watchers extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
       <div className="container">
@@ -205,4 +202,4 @@ class Watchers extends React.Component {
   }
 }
 
-export default connect()(Watchers)
+export default connect(mapState, mapDispatch)(Watchers)
