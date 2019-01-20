@@ -1,18 +1,11 @@
-import React, {Children} from 'react'
-import Link from 'next/link'
+import React from 'react'
 import {withRouter} from 'next/router'
 import {connect} from 'react-redux'
 import {Eye} from 'react-feather'
 
-import {mapState, mapDispatch} from '../reducers/watchers'
+import ActiveLink from './ActiveLink'
 
-const ActiveLink = withRouter(({router, children, as, href, ...props}) => (
-   <Link href={href} as={as} {...props}>
-    {React.cloneElement(Children.only(children), {
-      className: (router.asPath === href || router.asPath === as) ? `active` : null
-    })}
-  </Link>
-));
+import {mapState, mapDispatch} from '../reducers/watchers'
 
 class Header extends React.Component {
   render() {
@@ -53,4 +46,4 @@ class Header extends React.Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(Header)
+export default withRouter(connect(mapState, mapDispatch)(Header))

@@ -34,4 +34,4 @@ class ArgusTool extends App {
   }
 }
 
-export default withRedux(initializeStore/*, {debug: true}*/)(ArgusTool)
+export default withRedux(initializeStore)(ArgusTool)

@@ -5,5 +5,6 @@ import thunkMiddleware from 'redux-thunk'
 import reducer from '../reducers'
 
 export function initializeStore(initialState = initialState) {
-  return createStore(reducer, initialState, composeWithDevTools(applyMiddleware(thunkMiddleware)))
+  return createStore(reducer, initialState,
+    composeWithDevTools(applyMiddleware(thunkMiddleware)))
 }

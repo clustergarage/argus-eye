@@ -25,7 +25,7 @@ const initialState = {
     annotations: {
       'clustergarage.io/created-by': 'argus-eye',
       'clustergarage.io/argus-eye.version': VERSION,
-    }
+    },
   },
   spec: {
     selector: {
