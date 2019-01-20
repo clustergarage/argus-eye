@@ -209,7 +209,13 @@ class Index extends React.Component {
         .tool-container {
           border-top: 2px solid #d9e2ec;
           margin-top: 3rem;
-          padding-top: 3rem;
+          padding-top: 4rem;
+        }
+
+        .file-viewer {
+          background-color: #f7f8fa;
+          margin-right: 2rem;
+          padding: 2rem;
         }
 
         .file-viewer h2 small {

@@ -99,9 +99,9 @@ class FileTree extends React.Component {
           }
 
           ul ul {
-            border-left: 1px dotted #ddd;
-            margin: 0 0 0 1rem;
-            padding: 0.5rem 0 0.5rem 2rem;
+            border-left: 2px solid #d9e2ec;
+            margin: 0 0 1rem 1rem;
+            padding: 0.5rem 0 0 2rem;
           }
 
           li {

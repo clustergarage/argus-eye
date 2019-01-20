@@ -45,28 +45,47 @@ label em {
   color: #27ab83;
 }
 
+.file-path .disabled i {
+  cursor: default;
+}
+
 .file-path .disabled i.check svg line,
 .file-path .ignored i.check svg line,
 .file-path .ignored i.ignore svg line {
   color: #9fb3c8;
 }
-.file-path .disabled a {
-  color: #9fb3c8;
-}
-.file-path .ignored a {
-  text-decoration-line: line-through;
-  text-decoration-color: #486581;
-}
 
 .file-path a {
-  color: #9446ed;
+  color: #8719e0;
   font-size: 1.5rem;
   vertical-align: top;
   cursor: pointer;
 }
 
+.file-path a:hover {
+  text-decoration: underline;
+}
+
+.file-path .disabled a,
+.file-path .ignored a {
+  cursor: default;
+}
+.file-path .disabled a:hover,
+.file-path .ignored a:hover {
+  text-decoration: none;
+}
+
+.file-path .disabled a {
+  color: #9fb3c8;
+}
+
+.file-path .ignored a {
+  text-decoration-line: line-through;
+  text-decoration-color: #486581;
+}
+
 .file-path a.symlink em {
-  color: #dac4ff;
+  color: #b990ff;
   font-style: normal;
   vertical-align: inherit;
 }

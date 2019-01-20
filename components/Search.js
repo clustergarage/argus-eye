@@ -1,6 +1,5 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {CornerDownRight} from 'react-feather'
 
 import {mapState, mapDispatch} from '../reducers/search'
 import {searchPods, podContainers, containerPID} from '../lib/api'
@@ -107,7 +106,6 @@ class Search extends React.Component {
           <label>
             Pod has <em>{this.props.containers.length}</em> containers; choose to view filesystem
           </label>
-          <i><CornerDownRight size={28} /></i>
           {this.props.containers.map(container => (
             <a key={container.containerID}
               className={`button button-small ${this.props.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
@@ -155,11 +153,6 @@ class Search extends React.Component {
 
           .container-select {
             margin-top: 2rem;
-          }
-
-          .container-select i {
-            vertical-align: sub;
-            margin-right: 0.5rem;
           }
         `}</style>
       </div>
