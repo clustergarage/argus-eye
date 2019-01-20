@@ -4,13 +4,13 @@ import {Trash2} from 'react-feather'
 import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
 
-import Layout from '../components/Layout'
 import Search from '../components/Search'
 import FileTree from '../components/FileTree'
 import WatcherOptions from '../components/WatcherOptions'
 import {mapState as mapSearchState, mapDispatch as mapSearchDispatch} from '../reducers/search'
 import {mapState as mapTreeState, mapDispatch as mapTreeDispatch} from '../reducers/file-tree'
 import {mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
+import {formatLabels} from '../util/util'
 
 const ReactHint = ReactHintFactory(React)
 
@@ -79,9 +79,7 @@ class Index extends React.Component {
 
   getSubjectState(index) {
     const subject = this.props.spec.subjects[index] || {}
-    const tags = Object.keys(subject.tags || {})
-      .map(tag => `${tag}=${subject.tags[tag]}`)
-      .join(',')
+    const tags = formatLabels(subject.tags)
     return {
       recursive: subject.recursive || false,
       maxDepth: subject.maxDepth || '',
@@ -127,85 +125,83 @@ class Index extends React.Component {
 
   render() {
     return (
-      <Layout>
-        <div className="container">
-          <div className="row">
-            <div className="column">
-              <Search onSelectorSubmit={this.onSelectorSubmit}
-                onLoadRootDirectory={this.onLoadRootDirectory} />
-            </div>
+      <div className="container">
+        <div className="row">
+          <div className="column">
+            <Search onSelectorSubmit={this.onSelectorSubmit}
+              onLoadRootDirectory={this.onLoadRootDirectory} />
+          </div>
+        </div>
+
+        {(!this.state.isLoading &&
+        this.props.directory) &&
+        <div className="row tool-container">
+          <div className="column file-viewer">
+            <h2>
+              File Viewer&nbsp;
+              <small>(PID: {this.props.directory.split('/')[2]})</small>
+            </h2>
+            <FileTree directory={this.props.directory}
+              subject={this.getSelectedSubject()}
+              recursive={this.state.spec.recursive}
+              maxDepth={this.state.spec.maxDepth}
+              onIgnoreClick={this.onIgnoreClick} />
           </div>
 
-          {(!this.state.isLoading &&
-          this.props.directory) &&
-          <div className="row tool-container">
-            <div className="column file-viewer">
-              <h2>
-                File Viewer&nbsp;
-                <small>(PID: {this.props.directory.split('/')[2]})</small>
-              </h2>
-              <FileTree directory={this.props.directory}
-                subject={this.getSelectedSubject()}
-                recursive={this.state.spec.recursive}
-                maxDepth={this.state.spec.maxDepth}
-                onIgnoreClick={this.onIgnoreClick} />
-            </div>
-
-            {this.props.selectedSubject !== null &&
-            <div className="column column-33">
-              <div>
-                <div className="watcher-subjects">
-                  <h3>
-                    <em>ArgusWatcher</em> Subjects
-                  </h3>
-                  {this.props.spec.subjects.map((subject, index) => (
-                  <div key={index}
-                    onClick={() => this.onSelectSubjectClick(index)}
-                    className={`subject ${this.props.selectedSubject === index ? 'active' : ''}`}>
-                    <ReactHint autoPosition
-                      events={{hover: true}} />
-                    {this.props.spec.subjects.length > 1 &&
-                    <div className="delete"
-                      data-rh="Delete subject"
-                      onClick={event => this.handleDeleteSubjectClick(event, index)}>
-                      <i><Trash2 size={18} /></i>
-                    </div>}
-                    <div className="title">
-                      Subject {index}
-                    </div>
-                    <small>
-                      paths = {subject.paths.length};
-                      events = {subject.events.length};
-                      recursive = {subject.recursive ? 'Y' : 'N'}
-                    </small>
+          {this.props.selectedSubject !== null &&
+          <div className="column column-33">
+            <div>
+              <div className="watcher-subjects">
+                <h3>
+                  <em>ArgusWatcher</em> Subjects
+                </h3>
+                {this.props.spec.subjects.map((subject, index) => (
+                <div key={index}
+                  onClick={() => this.onSelectSubjectClick(index)}
+                  className={`subject ${this.props.selectedSubject === index ? 'active' : ''}`}>
+                  <ReactHint autoPosition
+                    events={{hover: true}} />
+                  {this.props.spec.subjects.length > 1 &&
+                  <div className="delete"
+                    data-rh="Delete subject"
+                    onClick={event => this.handleDeleteSubjectClick(event, index)}>
+                    <i><Trash2 size={18} /></i>
+                  </div>}
+                  <div className="title">
+                    Subject {index}
                   </div>
-                  ))}
-                  <button type="button"
-                    onClick={this.onCreateSubjectClick}
-                    className="button create-subject">
-                    Create subject
-                  </button>
+                  <small>
+                    paths = {subject.paths.length};
+                    events = {subject.events.length};
+                    recursive = {subject.recursive ? 'Y' : 'N'}
+                  </small>
                 </div>
-                <div className="watcher-options">
-                  <h3>
-                    <em>ArgusWatcher</em> Options
-                  </h3>
-                  <WatcherOptions subject={this.getSelectedSubject()}
-                    recursive={this.state.spec.recursive}
-                    maxDepth={this.state.spec.maxDepth}
-                    onlyDir={this.state.spec.onlyDir}
-                    followMove={this.state.spec.followMove}
-                    tags={this.state.spec.tags}
-                    onRecursiveChange={this.onRecursiveChange}
-                    onMaxDepthChange={this.onMaxDepthChange}
-                    onOnlyDirChange={this.onOnlyDirChange}
-                    onFollowMoveChange={this.onFollowMoveChange}
-                    onTagsChange={this.onTagsChange} />
-                </div>
+                ))}
+                <button type="button"
+                  onClick={this.onCreateSubjectClick}
+                  className="button create-subject">
+                  Create subject
+                </button>
               </div>
-            </div>}
+              <div className="watcher-options">
+                <h3>
+                  <em>ArgusWatcher</em> Options
+                </h3>
+                <WatcherOptions subject={this.getSelectedSubject()}
+                  recursive={this.state.spec.recursive}
+                  maxDepth={this.state.spec.maxDepth}
+                  onlyDir={this.state.spec.onlyDir}
+                  followMove={this.state.spec.followMove}
+                  tags={this.state.spec.tags}
+                  onRecursiveChange={this.onRecursiveChange}
+                  onMaxDepthChange={this.onMaxDepthChange}
+                  onOnlyDirChange={this.onOnlyDirChange}
+                  onFollowMoveChange={this.onFollowMoveChange}
+                  onTagsChange={this.onTagsChange} />
+              </div>
+            </div>
           </div>}
-        </div>
+        </div>}
 
         <style jsx>{`
         .tool-container {
@@ -278,7 +274,7 @@ class Index extends React.Component {
           font-size: 0.8rem;
         }
         `}</style>
-      </Layout>
+      </div>
     )
   }
 }

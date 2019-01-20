@@ -129,15 +129,13 @@ class Search extends React.Component {
             margin-right: 1rem;
           }
 
-          .found-pods {
-            margin-bottom: 1rem;
+          .found-pods em,
+          .container-select em {
+            padding: 0.2rem 0.4rem;
           }
 
-          .found-pods em {
-            color: #000;
-            font-style: normal;
-            background-color: #c6f7e2;
-            padding: 0.1rem 0.4rem;
+          .found-pods {
+            margin-bottom: 1rem;
           }
 
           .found-pods a {
@@ -153,6 +151,10 @@ class Search extends React.Component {
 
           .container-select {
             margin-top: 2rem;
+          }
+
+          .container-select .button {
+            margin-top: 0.5rem;
           }
         `}</style>
       </div>

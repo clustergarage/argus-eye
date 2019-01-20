@@ -1,19 +1,29 @@
+import React from 'react'
 import Header from './Header'
+import {connect} from 'react-redux'
 
 import 'milligram/dist/milligram.css'
 import '../styles/style.css'
 
-const Layout = (props) => (
-  <div className="layout">
-    {<Header />}
-    {props.children}
+class Layout extends React.Component {
+  constructor(props) {
+    super(props)
+  }
 
-    <style jsx>{`
-    .layout {
-      margin: 2rem;
-    }
-    `}</style>
-  </div>
-)
+  render() {
+    return (
+      <div className="layout">
+        {<Header watchers={this.props.watchers} />}
+        {this.props.children}
 
-export default Layout
+        <style jsx>{`
+        .layout {
+          margin: 2rem;
+        }
+        `}</style>
+      </div>
+    )
+  }
+}
+
+export default connect()(Layout)

@@ -1,37 +1,58 @@
+import React, {Children} from 'react'
 import Link from 'next/link'
+import {withRouter} from 'next/router'
+import {connect} from 'react-redux'
 import {Eye} from 'react-feather'
 
-const Header = () => (
-  <div>
-    <h1>
-      Argus
-      <i className="logo"><Eye size={48} /></i>
-    </h1>
+const ActiveLink = withRouter(({router, children, as, href, ...props}) => (
+   <Link href={href} as={as} {...props}>
+    {React.cloneElement(Children.only(children), {
+      className: (router.asPath === href || router.asPath === as) ? `active` : null
+    })}
+  </Link>
+));
 
-    <div className="header">
-      <Link href="/">
-        <a>Visual editor</a>
-      </Link>
-      <Link href="/export-config">
-        <a>Export configuration</a>
-      </Link>
-    </div>
+class Header extends React.Component {
+  constructor(props) {
+    super(props)
+  }
 
-    <style jsx>{`
-    h1 i {
-      vertical-align: sub;
-      margin: 1rem 0 0 1rem;
-    }
+  render() {
+    return (
+      <div>
+        <h1>
+          Argus&nbsp;
+          <i className="logo"><Eye size={48} /></i>
+        </h1>
 
-    .header {
-      margin-bottom: 3rem;
-    }
+        <div className="header">
+          <ActiveLink prefetch href="/watchers">
+            <a>
+              Watchers&nbsp;
+              <small><em>{this.props.watchers.length}</em></small>
+            </a>
+          </ActiveLink>
+          <ActiveLink prefetch href="/">
+            <a>Visual editor</a>
+          </ActiveLink>
+          <ActiveLink prefetch href="/export-config">
+            <a>Export configuration</a>
+          </ActiveLink>
+        </div>
 
-    .header a {
-      margin-right: 3rem;
-    }
-    `}</style>
-  </div>
-)
+        <style jsx>{`
+        h1 {
+          margin-left: 2rem;
+        }
 
-export default Header
+        h1 i {
+          vertical-align: sub;
+          margin-top: 1rem;
+        }
+        `}</style>
+      </div>
+    )
+  }
+}
+
+export default connect()(Header)

@@ -318,6 +318,7 @@ class WatcherOptions extends React.Component {
         ul.ignored li i {
           margin-right: 0.5rem;
           vertical-align: sub;
+          vertical-align: -webkit-baseline-middle;
         }
 
         .recursive {
@@ -356,6 +357,7 @@ class WatcherOptions extends React.Component {
         .log-format .live-example i,
         .log-format .specifiers i {
           vertical-align: sub;
+          vertical-align: -webkit-baseline-middle;
           margin-right: 0.5rem;
         }
         `}</style>

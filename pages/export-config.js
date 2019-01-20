@@ -14,7 +14,6 @@ import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
 import yaml from 'js-yaml'
 
-import Layout from '../components/Layout'
 import {mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
 import {applyArgusWatcher} from '../lib/api'
 
@@ -164,112 +163,110 @@ class ExportConfig extends React.Component {
     const yamlFormatted = yaml.safeDump(json)
 
     return (
-      <Layout>
-        <div className="container">
-          <div className="row">
-            <div className="column">
-              <h3>
-                <em>ArgusWatcher</em> Metadata
-              </h3>
-            </div>
+      <div className="container">
+        <div className="row">
+          <div className="column">
+            <h3>
+              <em>ArgusWatcher</em> Metadata
+            </h3>
           </div>
-          <div className="row">
-            <div className="column">
-              <label>
-                Name&nbsp;
-                <small>(required)</small>
-                <input type="text"
-                  value={this.state.name}
-                  onChange={this.handleNameChange}
-                  placeholder="mywatcher" />
-              </label>
-            </div>
-            <div className="column">
-              <label>
-                Namespace
-                <input type="text"
-                  value={this.state.namespace}
-                  onChange={this.handleNamespaceChange}
-                  placeholder="mynamespace" />
-              </label>
-            </div>
+        </div>
+        <div className="row">
+          <div className="column">
+            <label>
+              Name&nbsp;
+              <small>(required)</small>
+              <input type="text"
+                value={this.state.name}
+                onChange={this.handleNameChange}
+                placeholder="mywatcher" />
+            </label>
           </div>
-          {this.checkIsDisabled() &&
-          <div className="row">
-            <div className="column required">
-              <blockquote>
-                <h5>
-                  <i><AlertTriangle size={24} /></i>
-                  Required fields
-                 </h5>
-                <ul>
-                  {this.getRequiredFields().map((required, index) => (
-                    <li key={index}>{required}</li>)
-                  )}
-                </ul>
-              </blockquote>
-            </div>
-          </div>}
-          <div className="row">
-            <div className="column buttons">
-              <button type="button"
-                className="button"
-                disabled={this.checkIsDisabled()}
-                onClick={this.handleDownloadClick}>
-                <i><Download size={18} /></i>
-                Download
-              </button>
-              <button type="button"
-                className="button"
-                disabled={this.checkIsDisabled()}
-                onClick={this.handleDeployToClusterClick}>
-                <i><Box size={18} /></i>
-                Deploy to cluster
-              </button>
-            </div>
+          <div className="column">
+            <label>
+              Namespace
+              <input type="text"
+                value={this.state.namespace}
+                onChange={this.handleNamespaceChange}
+                placeholder="mynamespace" />
+            </label>
           </div>
-          <div className="row">
-            <div className="column">
-              <h3>YAML</h3>
-              <div className="output-syntax">
-                <ReactHint attribute="data-yaml"
-                  position="top"
-                  events={{hover: true}}
-                  onRenderContent={() => this.onRenderTooltipContent('yaml')} />
-                <div className="copy-clipboard"
-                  data-yaml={this.state.tooltip.yaml}
-                  onClick={() => this.handleTooltipClick('yaml')}
-                  onMouseLeave={event => this.handleTooltipLeave(event, 'yaml')}>
-                  <Clipboard component="div"
-                    data-clipboard-text={yamlFormatted}>
-                    <i><Copy size={18} /></i>
-                  </Clipboard>
-                </div>
-                <SyntaxHighlighter language="yaml" style={github}>
-                  {yamlFormatted}
-                </SyntaxHighlighter>
+        </div>
+        {this.checkIsDisabled() &&
+        <div className="row">
+          <div className="column required">
+            <blockquote>
+              <h5>
+                <i><AlertTriangle size={24} /></i>
+                Required fields
+                </h5>
+              <ul>
+                {this.getRequiredFields().map((required, index) => (
+                  <li key={index}>{required}</li>)
+                )}
+              </ul>
+            </blockquote>
+          </div>
+        </div>}
+        <div className="row">
+          <div className="column buttons">
+            <button type="button"
+              className="button"
+              disabled={this.checkIsDisabled()}
+              onClick={this.handleDownloadClick}>
+              <i><Download size={18} /></i>
+              Download
+            </button>
+            <button type="button"
+              className="button"
+              disabled={this.checkIsDisabled()}
+              onClick={this.handleDeployToClusterClick}>
+              <i><Box size={18} /></i>
+              Deploy to cluster
+            </button>
+          </div>
+        </div>
+        <div className="row">
+          <div className="column">
+            <h3>YAML</h3>
+            <div className="output-syntax">
+              <ReactHint attribute="data-yaml"
+                position="top"
+                events={{hover: true}}
+                onRenderContent={() => this.onRenderTooltipContent('yaml')} />
+              <div className="copy-clipboard"
+                data-yaml={this.state.tooltip.yaml}
+                onClick={() => this.handleTooltipClick('yaml')}
+                onMouseLeave={event => this.handleTooltipLeave(event, 'yaml')}>
+                <Clipboard component="div"
+                  data-clipboard-text={yamlFormatted}>
+                  <i><Copy size={18} /></i>
+                </Clipboard>
               </div>
+              <SyntaxHighlighter language="yaml" style={github}>
+                {yamlFormatted}
+              </SyntaxHighlighter>
             </div>
-            <div className="column">
-              <h3>JSON</h3>
-              <div className="output-syntax">
-                <ReactHint attribute="data-json"
-                  position="top"
-                  events={{hover: true}}
-                  onRenderContent={() => this.onRenderTooltipContent('json')} />
-                <div className="copy-clipboard"
-                  data-json={this.state.tooltip.json}
-                  onClick={() => this.handleTooltipClick('json')}
-                  onMouseLeave={event => this.handleTooltipLeave(event, 'json')}>
-                  <Clipboard component="div"
-                    data-clipboard-text={jsonFormatted}>
-                    <i><Copy size={18} /></i>
-                  </Clipboard>
-                </div>
-                <SyntaxHighlighter language="json" style={github}>
-                  {jsonFormatted}
-                </SyntaxHighlighter>
+          </div>
+          <div className="column">
+            <h3>JSON</h3>
+            <div className="output-syntax">
+              <ReactHint attribute="data-json"
+                position="top"
+                events={{hover: true}}
+                onRenderContent={() => this.onRenderTooltipContent('json')} />
+              <div className="copy-clipboard"
+                data-json={this.state.tooltip.json}
+                onClick={() => this.handleTooltipClick('json')}
+                onMouseLeave={event => this.handleTooltipLeave(event, 'json')}>
+                <Clipboard component="div"
+                  data-clipboard-text={jsonFormatted}>
+                  <i><Copy size={18} /></i>
+                </Clipboard>
               </div>
+              <SyntaxHighlighter language="json" style={github}>
+                {jsonFormatted}
+              </SyntaxHighlighter>
             </div>
           </div>
         </div>
@@ -287,6 +284,7 @@ class ExportConfig extends React.Component {
 
         .button i {
           vertical-align: sub;
+          vertical-align: -webkit-baseline-middle;
           margin-right: 1rem;
         }
 
@@ -294,7 +292,7 @@ class ExportConfig extends React.Component {
           position: relative;
         }
         `}</style>
-      </Layout>
+      </div>
     )
   }
 }

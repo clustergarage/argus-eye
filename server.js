@@ -56,6 +56,12 @@ app.prepare()
         .then(result => res.send(result.body))
     })
 
+    server.get('/k8s/arguswatchers', (req, res) => {
+      k8sCustomApi.listClusterCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
+        ARGUSWATCHER_RESOURCE/*, null, null, null, true*/) // watch -> response.on('data', chunk => chunk)
+        .then(result => res.send(result.body))
+    })
+
     server.post('/k8s/:namespace/arguswatcher/:name', (req, res) => {
       assert(req.params.namespace)
       assert(req.params.name)
@@ -65,7 +71,7 @@ app.prepare()
       // try to get existing arguswatcher in namespace/name form
       k8sCustomApi.getNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
         namespace, ARGUSWATCHER_RESOURCE, name)
-        .then(response => {
+        .then(() => {
           // existing object needs to be patched
           k8sCustomApi.patchNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
             namespace, ARGUSWATCHER_RESOURCE, name, req.body)

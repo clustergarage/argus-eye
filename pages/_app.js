@@ -3,20 +3,29 @@ import React from 'react'
 import {Provider} from 'react-redux'
 import withRedux from 'next-redux-wrapper'
 
+import Layout from '../components/Layout'
 import {initializeStore} from '../store/store'
+import {listArgusWatchers} from '../lib/api'
 
 class ArgusTool extends App {
   static async getInitialProps({Component, ctx}) {
     const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {}
-    return {pageProps};
+    const watchers = await listArgusWatchers(ctx.req)
+    return {
+      pageProps,
+      watchers,
+    }
   }
 
   render() {
-    const {Component, pageProps, store} = this.props
+    const {Component, pageProps, store, watchers} = this.props
+    let passProps = {...pageProps, watchers}
     return (
       <Container>
         <Provider store={store}>
-          <Component {...pageProps} />
+          <Layout {...passProps}>
+            <Component {...passProps} />
+          </Layout>
         </Provider>
       </Container>
     )
