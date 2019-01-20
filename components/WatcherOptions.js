@@ -62,9 +62,8 @@ class WatcherOptions extends React.Component {
   handleTagsChange(event) {
     const tagsToObject = tags => {
       const arr = tags.split(',')
-      let i = 0, len = arr.length
       let obj = {}
-      for (; i < len; ++i) {
+      for (let i = 0; i < arr.length; ++i) {
         let [key, value] = arr[i].split('=')
         if (key && value) {
           obj[key] = value
@@ -300,9 +299,12 @@ class WatcherOptions extends React.Component {
           margin-bottom: 2rem;
         }
 
-        ul.paths,
-        ul.ignored {
+        ul.paths {
           margin: 1rem 0 2rem;
+        }
+
+        ul.ignored {
+          margin: 1rem 0;
         }
 
         ul.paths li,

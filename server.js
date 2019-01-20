@@ -13,11 +13,6 @@ const handle = app.getRequestHandler()
 // @TODO: add other container runtimes
 const docker = new dockerode({socketPath: '/var/run/docker.sock'})
 
-const kc = new k8s.KubeConfig()
-kc.loadFromDefault()
-const k8sApi = kc.makeApiClient(k8s.Core_v1Api)
-//const k8sCustomApi = kc.makeApiClient(k8s.Custom_objectsApi)
-
 // @FIXME: https://github.com/kubernetes-client/javascript/issues/19
 // until this is fixed, the patch* commands are not setting the proper headers
 class K8sCustomObjectsApi extends k8s.Custom_objectsApi {
@@ -33,7 +28,10 @@ class K8sCustomObjectsApi extends k8s.Custom_objectsApi {
   }
 }
 
-const k8sCustomApi = kc.makeApiClient(K8sCustomObjectsApi)
+const kc = new k8s.KubeConfig()
+kc.loadFromDefault()
+const k8sApi = kc.makeApiClient(k8s.Core_v1Api)
+const k8sCustomApi = kc.makeApiClient(K8sCustomObjectsApi/*k8s.Custom_objectsApi*/)
 
 const ARGUSWATCHER_GROUP = 'arguscontroller.clustergarage.io'
 const ARGUSWATCHER_VERSION = 'v1alpha1'
@@ -67,22 +65,22 @@ app.prepare()
       // try to get existing arguswatcher in namespace/name form
       k8sCustomApi.getNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
         namespace, ARGUSWATCHER_RESOURCE, name)
-        .then((response) => {
+        .then(response => {
           // existing object needs to be patched
           k8sCustomApi.patchNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
             namespace, ARGUSWATCHER_RESOURCE, name, req.body)
             .then(result => res.send(result.body))
-            .catch((e) => console.error(e.body))
-        }, (reject) => {
+            .catch(e => console.error(e.body))
+        }, reject => {
           if (reject.body.reason === 'NotFound') {
             // no object with this name exists, create new object
             k8sCustomApi.createNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
               namespace, ARGUSWATCHER_RESOURCE, req.body)
               .then(result => res.send(result.body))
-              .catch((e) => console.error(e.body))
+              .catch(e => console.error(e.body))
           }
         })
-        .catch((e) => console.error(e))
+        .catch(e => console.error(e))
     })
 
     server.get('/docker/container/:id/pid', (req, res) => {
@@ -104,7 +102,7 @@ app.prepare()
             return done(err)
           }
 
-          const next = (res) => {
+          const next = res => {
             let file = list[i++]
             if (!file) {
               return done(null, results)
@@ -140,14 +138,14 @@ app.prepare()
       return handle(req, res)
     })
 
-    server.listen(3000, (err) => {
+    server.listen(3000, err => {
       if (err) {
         throw err
       }
-      console.log('> Ready on http://localhost:3000')
+      console.log('Listening on http://localhost:3000')
     })
   })
-  .catch((e) => {
+  .catch(e => {
     console.error(e.stack)
     process.exit(1)
   })

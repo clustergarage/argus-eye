@@ -38,15 +38,16 @@ class Index extends React.Component {
   onSelectorSubmit(selector) {
     this.props.dispatchSetSelector(selector)
     this.props.dispatchClearSearchState()
+    // @TODO: confirm with the user before clearing config state especially
+    this.props.dispatchClearConfigState()
   }
 
   onLoadRootDirectory(cid, directory) {
     this.setState({isLoading: true})
-    // @TODO: confirm with the user before clearing config state especially
-    this.props.dispatchClearConfigState()
-
     this.props.dispatchSetRootDirectory(cid, directory)
-    this.createAndSelectSubject()
+    if (this.props.selectedSubject === null) {
+      this.createAndSelectSubject()
+    }
     this.setState({isLoading: false})
   }
 
@@ -135,9 +136,9 @@ class Index extends React.Component {
             </div>
           </div>
 
-          {!this.state.isLoading &&
+          {(!this.state.isLoading &&
+          this.props.directory) &&
           <div className="row tool-container">
-            {this.props.directory &&
             <div className="column file-viewer">
               <h2>
                 File Viewer&nbsp;
@@ -148,7 +149,8 @@ class Index extends React.Component {
                 recursive={this.state.spec.recursive}
                 maxDepth={this.state.spec.maxDepth}
                 onIgnoreClick={this.onIgnoreClick} />
-            </div>}
+            </div>
+
             {this.props.selectedSubject !== null &&
             <div className="column column-33">
               <div>
@@ -214,6 +216,7 @@ class Index extends React.Component {
 
         .file-viewer {
           background-color: #f7f8fa;
+          border-radius: 0.6rem;
           margin-right: 2rem;
           padding: 2rem;
         }
