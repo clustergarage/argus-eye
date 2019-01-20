@@ -12,10 +12,11 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import {github} from 'react-syntax-highlighter/dist/styles/hljs'
 import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
+import yaml from 'js-yaml'
 
 import Layout from '../components/Layout'
-import {json2yaml} from '../lib/json2yaml'
 import {mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
+import {applyArgusWatcher} from '../lib/api'
 
 const ReactHint = ReactHintFactory(React)
 const COPY_TOOLTIP = (<span>Copy to clipboard</span>)
@@ -88,18 +89,21 @@ class ExportConfig extends React.Component {
   }
 
   handleNamespaceChange(event) {
-     this.setState({namespace: event.target.value})
+    this.setState({namespace: event.target.value})
     this.props.dispatchSetNamespace(event.target.value)
   }
 
-  handleDownloadClick(event) {
-    download(json2yaml(this.getObjectConfigJSON()),
+  handleDownloadClick() {
+    download(yaml.safeDump(this.getObjectConfigJSON()),
       `${this.props.objectConfig.metadata.name}-argus-watcher.yaml`,
       'text/x-yaml')
   }
 
-  handleDeployToClusterClick(event) {
+  async handleDeployToClusterClick() {
     const json = this.getObjectConfigJSON()
+    const response = await applyArgusWatcher(json.metadata.namespace,
+      json.metadata.name, json)
+    // @TODO: add spinner, message, complete, error
   }
 
   handleTooltipClick(key) {
@@ -157,7 +161,7 @@ class ExportConfig extends React.Component {
   render() {
     const json = this.getObjectConfigJSON()
     const jsonFormatted = JSON.stringify(json, null, 2)
-    const yamlFormatted = json2yaml(json)
+    const yamlFormatted = yaml.safeDump(json)
 
     return (
       <Layout>

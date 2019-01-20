@@ -144,7 +144,7 @@ class Search extends React.Component {
             color: #486581;
             font: 1.4rem 'Ubuntu Mono', monospace;
             font-weight: normal;
-            margin-right: 4rem;
+            margin-right: 3rem;
           }
 
           .found-pods a span {
