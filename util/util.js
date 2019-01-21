@@ -24,12 +24,3 @@ export const containsAll = (haystack, needles) => {
   }
   return true
 }
-
-export const containsNone = (haystack, needles) => {
-  for (let i = 0; i < needles.length; ++i) {
-    if (haystack.indexOf(needles[i]) > -1) {
-      return false
-    }
-  }
-  return true
-}

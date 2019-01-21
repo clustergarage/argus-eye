@@ -1,4 +1,4 @@
-import {tagsToObject, containsAll, containsNone} from '../util/util'
+import {tagsToObject, containsAll} from '../util/util'
 
 const SET_NAME = 'SET_NAME'
 const SET_NAMESPACE = 'SET_NAMESPACE'
@@ -80,49 +80,43 @@ const reducer = (state = initialState, action) => {
         evtArr.push(action.value)
       }
 
-      const findEvtMapKeys = value => {
-        let keys = []
-        Object.keys(EVENT_MAP).forEach(key => {
-          if (EVENT_MAP[key].indexOf(value) > -1) {
-            keys.push(key)
-          }
-        })
-        return keys
-      }
-
       // if value is an event map key, toggle appropriate associated values
-      if (evtArr[action.value]) {
-        for (let i = 0; i < evtArr[action.value]; ++i) {
+      if (EVENT_MAP[action.value]) {
+        for (let i = 0; i < EVENT_MAP[action.value].length; ++i) {
+          const val = EVENT_MAP[action.value][i]
+          let assocIdx = evtArr.indexOf(val)
           if (evtIdx > -1) {
             // toggled off
-            let assocIdx = evtArr.indexOf(evtArr[action.value][i])
             if (assocIdx > -1) {
               evtArr.splice(assocIdx, 1)
             }
           } else {
             // toggled on
-            evtArr.push(evtArr[action.value][i])
+            if (assocIdx === -1) {
+              evtArr.push(val)
+            }
           }
         }
       } else {
-        // if value is an associated value, find event map keys
-        const keys = findEvtMapKeys(action.value)
-        for (let i = 0; i < keys.length; ++i) {
-          if (evtIdx > -1) {
-            // toggled off
-            if (containsNone(evtArr, EVENT_MAP[keys[i]])) {
-              // all associated values were removed
-              let keyIdx = evtArr.indexOf(keys[i])
-              evtArr.splice(keyIdx, 1)
-            }
-          } else {
-            // toggled on
-            if (containsAll(evtArr, EVENT_MAP[keys[i]])) {
-              // all associated values were added
-              evtArr.push(keys[i])
+        // if value is an associated value, loop through event map keys
+        Object.keys(EVENT_MAP).forEach(key => {
+          if (EVENT_MAP[key].indexOf(action.value) > -1) {
+            let keyIdx = evtArr.indexOf(key)
+            if (evtIdx > -1) {
+              // toggled off
+              if (keyIdx > -1) {
+                evtArr.splice(keyIdx, 1)
+              }
+            } else {
+              // toggled on
+              if (containsAll(evtArr, EVENT_MAP[key]) &&
+                keyIdx === -1) {
+                // all associated values were added
+                evtArr.push(key)
+              }
             }
           }
-        }
+        })
       }
 
       newState.spec.subjects = [
