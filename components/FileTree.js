@@ -122,6 +122,63 @@ class FileTree extends React.Component {
             vertical-align: inherit;
           }
         `}</style>
+        <style global jsx>{`
+        .file-path i {
+          margin-right: 1rem;
+          vertical-align: sub;
+          cursor: pointer;
+        }
+
+        .file-path .selected i.check svg polyline,
+        table td label.option i svg polyline {
+          color: #27ab83;
+        }
+
+        .file-path .disabled i {
+          cursor: default;
+        }
+
+        .file-path .disabled i.check svg line,
+        .file-path .ignored i.check svg line,
+        .file-path .ignored i.ignore svg line {
+          color: #9fb3c8;
+        }
+
+        .file-path a {
+          color: #8719e0;
+          font-size: 1.5rem;
+          vertical-align: top;
+          cursor: pointer;
+        }
+
+        .file-path a:hover {
+          text-decoration: underline;
+        }
+
+        .file-path .disabled a,
+        .file-path .ignored a {
+          cursor: default;
+        }
+        .file-path .disabled a:hover,
+        .file-path .ignored a:hover {
+          text-decoration: none;
+        }
+
+        .file-path .disabled a {
+          color: #9fb3c8;
+        }
+
+        .file-path .ignored a {
+          text-decoration-line: line-through;
+          text-decoration-color: #486581;
+        }
+
+        .file-path a.symlink em {
+          color: #b990ff;
+          font-style: normal;
+          vertical-align: inherit;
+        }
+        `}</style>
       </ul>
     )
   }

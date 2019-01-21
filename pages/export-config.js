@@ -305,6 +305,63 @@ class ExportConfig extends React.Component {
           position: relative;
         }
         `}</style>
+        <style global jsx>{`
+        .required blockquote {
+          font-family: 'Ubuntu Mono', monospace;
+          background-color: #f7f8fa;
+          border-left-color: #e12d39;
+          padding: 2rem;
+        }
+
+        .required blockquote h5 {
+          font-size: 1.6rem;
+        }
+
+        .required blockquote h5 i {
+          color: #cf1124;
+          vertical-align: sub;
+          vertical-align: -webkit-baseline-middle;
+          margin-right: 1rem;
+        }
+
+        .required blockquote li {
+          font-size: 1.4rem;
+          list-style: disc;
+          margin: 0 0 0.25rem 2rem;
+          padding-left: 1rem;
+        }
+
+        .required blockquote li em {
+          color: #000;
+          background-color: #ffe3e3;
+          font-style: normal;
+          padding: 0.2rem 0.4rem;
+        }
+
+        .copy-clipboard {
+          position: absolute;
+          top: 0.6rem;
+          right: 0.75rem;
+        }
+
+        .copy-clipboard [data-clipboard-text] {
+          height: 18px;
+        }
+
+        .copy-clipboard i {
+          color: #a368fc;
+          cursor: pointer;
+        }
+
+        .copy-clipboard:hover i {
+          color: #7a0ecc;
+        }
+
+        .output-syntax pre,
+        .output-syntax code {
+          background-color: transparent;
+        }
+        `}</style>
       </div>
     )
   }
