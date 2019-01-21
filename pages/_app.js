@@ -9,12 +9,12 @@ import {mapDispatch} from '../reducers/watchers'
 import {listArgusWatchers} from '../lib/api'
 
 class ArgusTool extends App {
-  static async getInitialProps({Component, ctx}) {
+  static async getInitialProps({Component, ctx, req}) {
     const dispatch = mapDispatch(ctx.store.dispatch)
     const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {}
 
     // only load on server-side
-    if (ctx.req) {
+    if (typeof window === 'undefined'/*ctx.req*/) {
       // get list of watchers and store
       const watchers = await listArgusWatchers(ctx.req)
       await dispatch.dispatchSetWatchers(watchers)

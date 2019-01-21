@@ -1,3 +1,5 @@
+import {tagsToObject, containsAll, containsNone} from '../util/util'
+
 const SET_NAME = 'SET_NAME'
 const SET_NAMESPACE = 'SET_NAMESPACE'
 const CREATE_SUBJECT = 'CREATE_SUBJECT'
@@ -17,6 +19,16 @@ const CLEAR_CONFIG_STATE = 'CLEAR_CONFIG_STATE'
 const VERSION = 'v0.1.0'
 const API_VERSION = 'arguscontroller.clustergarage.io/v1alpha1'
 const KIND = 'ArgusWatcher'
+
+const EVENT_MAP = {
+  close: ['closewrite', 'closenowrite'],
+  move: ['movedfrom', 'movedto'],
+  all: [
+    'access', 'attrib', 'closewrite', 'closenowrite', 'close',
+    'create', 'delete', 'deleteself', 'modify', 'moveself',
+    'movedfrom', 'movedto', 'move', 'open',
+  ],
+}
 
 const initialState = {
   apiVersion: API_VERSION,
@@ -57,15 +69,74 @@ const reducer = (state = initialState, action) => {
       ]
       break
     case SET_SELECTOR:
-      let labels = {}
-      action.selector.replace(/([^=\,]+)=([^\,]*)/g, (_, k, v) => labels[k] = v)
-      newState.spec.selector.matchLabels = labels
+      newState.spec.selector.matchLabels = tagsToObject(action.selector)
       break
     case TOGGLE_EVENT:
+      let evtArr = newState.spec.subjects[index].events || []
+      const evtIdx = evtArr.indexOf(action.value)
+      if (evtIdx > -1) {
+        evtArr.splice(evtIdx, 1)
+      } else {
+        evtArr.push(action.value)
+      }
+
+      const findEvtMapKeys = value => {
+        let keys = []
+        Object.keys(EVENT_MAP).forEach(key => {
+          if (EVENT_MAP[key].indexOf(value) > -1) {
+            keys.push(key)
+          }
+        })
+        return keys
+      }
+
+      // if value is an event map key, toggle appropriate associated values
+      if (evtArr[action.value]) {
+        for (let i = 0; i < evtArr[action.value]; ++i) {
+          if (evtIdx > -1) {
+            // toggled off
+            let assocIdx = evtArr.indexOf(evtArr[action.value][i])
+            if (assocIdx > -1) {
+              evtArr.splice(assocIdx, 1)
+            }
+          } else {
+            // toggled on
+            evtArr.push(evtArr[action.value][i])
+          }
+        }
+      } else {
+        // if value is an associated value, find event map keys
+        const keys = findEvtMapKeys(action.value)
+        for (let i = 0; i < keys.length; ++i) {
+          if (evtIdx > -1) {
+            // toggled off
+            if (containsNone(evtArr, EVENT_MAP[keys[i]])) {
+              // all associated values were removed
+              let keyIdx = evtArr.indexOf(keys[i])
+              evtArr.splice(keyIdx, 1)
+            }
+          } else {
+            // toggled on
+            if (containsAll(evtArr, EVENT_MAP[keys[i]])) {
+              // all associated values were added
+              evtArr.push(keys[i])
+            }
+          }
+        }
+      }
+
+      newState.spec.subjects = [
+        ...newState.spec.subjects.slice(0, index),
+        newState.spec.subjects[index] = Object.assign({}, newState.spec.subjects[index], {
+          events: evtArr,
+        }),
+        ...newState.spec.subjects.slice(index + 1),
+      ]
+      break
     case TOGGLE_SUBJECT_PATH:
     case TOGGLE_SUBJECT_IGNORE:
       let arr = newState.spec.subjects[index][action.key] || []
-      const idx = arr.indexOf(action.value)
+      let idx = arr.indexOf(action.value)
       if (idx > -1) {
         arr.splice(idx, 1)
       } else {
@@ -113,7 +184,7 @@ export const setNamespace = value => ({type: SET_NAMESPACE, key: 'namespace', va
 export const createSubject = () => ({type: CREATE_SUBJECT})
 export const deleteSubject = index => ({type: DELETE_SUBJECT, index})
 export const setSelector = selector => ({type: SET_SELECTOR, selector})
-export const toggleEvent = (subject, value) => ({type: TOGGLE_EVENT, subject, event, key: 'events', value})
+export const toggleEvent = (subject, value) => ({type: TOGGLE_EVENT, subject, value})
 export const toggleSubjectPath = (subject, value) => ({type: TOGGLE_SUBJECT_PATH, subject, key: 'paths', value})
 export const toggleSubjectIgnore = (subject, value) => ({type: TOGGLE_SUBJECT_IGNORE, subject, key: 'ignore', value})
 export const toggleRecursive = subject => ({type: TOGGLE_RECURSIVE, subject, key: 'recursive'})

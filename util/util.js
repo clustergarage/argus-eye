@@ -11,13 +11,25 @@ export const formatLabels = obj => {
 }
 
 export const tagsToObject = tags => {
-  const arr = tags.split(',')
   let obj = {}
-  for (let i = 0; i < arr.length; ++i) {
-    let [key, value] = arr[i].split('=')
-    if (key && value) {
-      obj[key] = value
+  tags.replace(/([^=\,]+)=([^\,]*)/g, (_, k, v) => obj[k] = v)
+  return obj
+}
+
+export const containsAll = (haystack, needles) => {
+  for (let i = 0; i < needles.length; ++i) {
+    if (haystack.indexOf(needles[i]) === -1) {
+      return false
     }
   }
-  return obj
+  return true
+}
+
+export const containsNone = (haystack, needles) => {
+  for (let i = 0; i < needles.length; ++i) {
+    if (haystack.indexOf(needles[i]) > -1) {
+      return false
+    }
+  }
+  return true
 }
