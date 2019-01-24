@@ -1,19 +1,19 @@
 const withCSS = require('@zeit/next-css')
-//const withOffline = require('next-offline')
+const withOffline = require('next-offline')
 
-//module.exports = withOffline(withCSS())
-module.exports = withCSS({
-  exportPathMap: async function(defaultPathMap) {
-    return {
-      '/': {
-        page: '/'
-      },
-      '/export-config': {
-        page: '/export-config'
-      },
-      '/watchers': {
-        page: '/watchers'
-      },
-    }
-  }
-})
+module.exports = withOffline(withCSS())
+//module.exports = withCSS({
+//  exportPathMap: async function(defaultPathMap) {
+//    return {
+//      '/': {
+//        page: '/'
+//      },
+//      '/export-config': {
+//        page: '/export-config'
+//      },
+//      '/watchers': {
+//        page: '/watchers'
+//      },
+//    }
+//  }
+//})

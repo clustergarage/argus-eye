@@ -50,6 +50,7 @@ class Search extends React.Component {
     this.selectContainer(cid)
   }
 
+  // @TODO: store in a shared location [for pages/index | pages/watchers]
   async loadPods() {
     const pods = await searchPods(this.state.labelSelector)
     this.props.dispatchSetPods(pods.map(pod => ({

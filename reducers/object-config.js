@@ -15,6 +15,7 @@ const SET_MAX_DEPTH = 'SET_MAX_DEPTH'
 const SET_TAGS = 'SET_TAGS'
 const SET_LOG_FORMAT = 'SET_LOG_FORMAT'
 const CLEAR_CONFIG_STATE = 'CLEAR_CONFIG_STATE'
+const REPLACE_CONFIG_STATE = 'REPLACE_CONFIG_STATE'
 
 const VERSION = 'v0.1.0'
 const API_VERSION = 'arguscontroller.clustergarage.io/v1alpha1'
@@ -159,6 +160,8 @@ const reducer = (state = initialState, action) => {
         logFormat: null,
       })
       break
+    case REPLACE_CONFIG_STATE:
+      return Object.assign({}, action.value)
     default:
       return state
   }
@@ -182,6 +185,7 @@ export const setMaxDepth = (subject, value) => ({type: SET_MAX_DEPTH, subject, v
 export const setTags = (subject, value) => ({type: SET_TAGS, subject, value})
 export const setLogFormat = value => ({type: SET_LOG_FORMAT, value})
 export const clearConfigState = () => ({type: CLEAR_CONFIG_STATE})
+export const replaceConfigState = value => ({type: REPLACE_CONFIG_STATE, value})
 
 export const mapState = state => ({
   apiVersion: state.objectConfig.apiVersion,
@@ -214,4 +218,5 @@ export const mapDispatch = dispatch => ({
   dispatchSetTags: (subject, value) => dispatch(setTags(subject, value)),
   dispatchSetLogFormat: value => dispatch(setLogFormat(value)),
   dispatchClearConfigState: () => dispatch(clearConfigState()),
+  dispatchReplaceConfigState: value => dispatch(replaceConfigState(value)),
 })

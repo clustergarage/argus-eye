@@ -3,10 +3,96 @@ import Moment from 'react-moment'
 import {connect} from 'react-redux'
 import {Check, CheckSquare, ChevronRight} from 'react-feather'
 
-import {mapState, mapDispatch} from '../reducers/watchers'
+import {mapState as mapSearchState, mapDispatch as mapSearchDispatch} from '../reducers/search'
+import {mapState as mapTreeState, mapDispatch as mapTreeDispatch} from '../reducers/file-tree'
+import {mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
+import {mapState as mapWatchersState, mapDispatch as mapWatchersDispatch} from '../reducers/watchers'
+import {searchPods, podContainers, containerPID, loadFSTree} from '../lib/api'
 import {formatLabels} from '../util/util'
 
 class Watchers extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.handleEditClick = this.handleEditClick.bind(this)
+  }
+
+  async handleEditClick(watcher) {
+    this.props.dispatchClearSearchState()
+    this.props.dispatchReplaceConfigState(watcher)
+
+    const labelSelector = formatLabels(watcher.spec.selector.matchLabels)
+    this.props.dispatchSetLabelSelector(labelSelector)
+
+    // get found pods => update state :: search with data
+    const pods = await this.loadPods(labelSelector)
+    let pid, cid
+    if (pods.length) {
+      const containers = await this.selectPod(pods[0])
+      if (containers.length > 1) {
+        this.props.dispatchSetContainers(containers.map(container => {
+          return Object.keys(container)
+            .filter(key => ['containerID', 'name'].includes(key))
+            .reduce((obj, key) => {
+              obj[key] = container[key]
+              return obj
+            }, {})
+        }))
+      }
+
+      for (let i = 0; i < containers.length; ++i) {
+        cid = containers[i].containerID
+        pid = await containerPID(cid)
+        if (i === 0) {
+          this.props.dispatchSelectSubject(i)
+          this.props.dispatchSetRootDirectory(cid, `/proc/${pid}/root`)
+        }
+
+        for (let j = 0; j < watcher.spec.subjects.length; ++j) {
+          let subject = watcher.spec.subjects[j]
+          for (let k = 0; k < subject.paths.length; ++k) {
+            let parts = subject.paths[k].split('/')
+            parts = parts.slice(1, parts.length - 1)
+
+            let cp = `/proc/${pid}/root`
+            for (let i = 0; i < parts.length; ++i) {
+              cp += '/' + parts[i]
+              if (!this.props.isVisible[cp]) {
+                this.props.toggleVisibility(cp)
+              }
+              if (!this.props.openedDirectories[cp]) {
+                let files = await loadFSTree(cp)
+                if (files.length) {
+                  this.props.dispatchOpenDirectory(cp, files)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // @TODO: store in a shared location [for pages/index | pages/watchers]
+  async loadPods(selector) {
+    const pods = await searchPods(selector)
+    this.props.dispatchSetPods(pods.map(pod => ({
+      metadata: Object.keys(pod.metadata)
+        .filter(key => ['uid', 'namespace', 'name'].includes(key))
+        .reduce((obj, key) => {
+          obj[key] = pod.metadata[key]
+          return obj
+        }, {})
+    })))
+    return pods
+  }
+
+  async selectPod(pod) {
+    const {namespace, name} = pod.metadata
+    const containers = await podContainers(namespace, name)
+    return containers
+  }
+
   render() {
     return (
       <div className="container">
@@ -26,8 +112,15 @@ class Watchers extends React.Component {
                 {this.props.watchers.map(watcher => (
                 <tr key={watcher.metadata.uid}>
                   <td className="buttons">
-                    <button type="button" className="button button-small">edit</button>
-                    <button type="button" className="button button-small">delete</button>
+                    <button type="button"
+                      className="button button-small"
+                      onClick={() => this.handleEditClick(watcher)}>
+                      edit
+                    </button>
+                    <button type="button"
+                      className="button button-small">
+                      delete
+                    </button>
                   </td>
                   <td>
                     {watcher.metadata.namespace} /&nbsp;
@@ -206,5 +299,17 @@ class Watchers extends React.Component {
     )
   }
 }
+
+const mapState = state => (Object.assign({},
+  mapSearchState(state),
+  mapTreeState(state),
+  mapConfigState(state),
+  mapWatchersState(state)))
+
+const mapDispatch = dispatch => (Object.assign({},
+  mapSearchDispatch(dispatch),
+  mapTreeDispatch(dispatch),
+  mapConfigDispatch(dispatch),
+  mapWatchersDispatch(dispatch)))
 
 export default connect(mapState, mapDispatch)(Watchers)

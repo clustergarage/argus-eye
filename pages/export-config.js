@@ -142,6 +142,10 @@ class ExportConfig extends React.Component {
       })
     }
 
+    // @TODO: remove metadata
+    // annotations:
+    //   kubectl.kubernetes.io/last-applied-configuration
+
     const normalizeEvents = json => {
       json.spec.subjects.map(subject => {
         subject.events.map(event => {
