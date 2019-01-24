@@ -85,39 +85,33 @@ const reducer = (state = initialState, action) => {
         for (let i = 0; i < EVENT_MAP[action.value].length; ++i) {
           const val = EVENT_MAP[action.value][i]
           let assocIdx = evtArr.indexOf(val)
-          if (evtIdx > -1) {
-            // toggled off
-            if (assocIdx > -1) {
-              evtArr.splice(assocIdx, 1)
-            }
-          } else {
-            // toggled on
-            if (assocIdx === -1) {
-              evtArr.push(val)
-            }
+          // toggled off
+          if (evtIdx > -1 &&
+            assocIdx > -1) {
+            evtArr.splice(assocIdx, 1)
+          // toggled on
+          } else if (assocIdx === -1) {
+            evtArr.push(val)
           }
         }
-      } else {
-        // if value is an associated value, loop through event map keys
-        Object.keys(EVENT_MAP).forEach(key => {
-          if (EVENT_MAP[key].indexOf(action.value) > -1) {
-            let keyIdx = evtArr.indexOf(key)
-            if (evtIdx > -1) {
-              // toggled off
-              if (keyIdx > -1) {
-                evtArr.splice(keyIdx, 1)
-              }
-            } else {
-              // toggled on
-              if (containsAll(evtArr, EVENT_MAP[key]) &&
-                keyIdx === -1) {
-                // all associated values were added
-                evtArr.push(key)
-              }
-            }
-          }
-        })
       }
+
+      // if value is an associated value, loop through event map keys
+      Object.keys(EVENT_MAP).forEach(key => {
+        if (EVENT_MAP[key].indexOf(action.value) > -1) {
+          let keyIdx = evtArr.indexOf(key)
+          // toggled off
+          if (evtIdx > -1 &&
+            keyIdx > -1) {
+            evtArr.splice(keyIdx, 1)
+          // toggled on
+          } else if (keyIdx === -1 &&
+            containsAll(evtArr, EVENT_MAP[key])) {
+            // all associated values were added
+            evtArr.push(key)
+          }
+        }
+      })
 
       newState.spec.subjects = [
         ...newState.spec.subjects.slice(0, index),
