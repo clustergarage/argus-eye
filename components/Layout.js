@@ -12,8 +12,14 @@ class Layout extends React.Component {
   render() {
     return (
       <div className="layout">
-        {<Header />}
-        {this.props.children}
+        <div className="container">
+          <div className="row">
+            <div className="column">
+              {<Header />}
+              {this.props.children}
+            </div>
+          </div>
+        </div>
 
         <style jsx>{`
         .layout {

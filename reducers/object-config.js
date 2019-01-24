@@ -20,7 +20,7 @@ const VERSION = 'v0.1.0'
 const API_VERSION = 'arguscontroller.clustergarage.io/v1alpha1'
 const KIND = 'ArgusWatcher'
 
-const EVENT_MAP = {
+export const EVENT_MAP = {
   close: ['closewrite', 'closenowrite'],
   move: ['movedfrom', 'movedto'],
   all: [
@@ -35,7 +35,7 @@ const initialState = {
   kind: KIND,
   metadata: {
     annotations: {
-      'clustergarage.io/created-by': 'argus-eye',
+      'clustergarage.io/generated-by': 'argus-eye',
       'clustergarage.io/argus-eye.version': VERSION,
     },
   },

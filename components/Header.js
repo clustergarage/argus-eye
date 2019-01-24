@@ -44,7 +44,7 @@ class Header extends React.Component {
         <style global jsx>{`
         .header {
           border-bottom: 2px solid #d9e2ec;
-          margin-bottom: 3rem;
+          margin-bottom: 4rem;
         }
 
         .header a {

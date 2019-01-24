@@ -14,7 +14,7 @@ import {github} from 'react-syntax-highlighter/dist/styles/hljs'
 import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
 
-import {mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
+import {EVENT_MAP, mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
 import {applyArgusWatcher} from '../lib/api'
 
 const ReactHint = ReactHintFactory(React)
@@ -122,7 +122,8 @@ class ExportConfig extends React.Component {
   }
 
   getObjectConfigJSON() {
-    let json = (this.props.objectConfig || {})
+    // @TODO: better ES6 deep-copy
+    let json = JSON.parse(JSON.stringify(this.props.objectConfig))
 
     const removeEmpty = obj => {
       const BOOLEAN_FLAGS = ['recursive', 'onlyDir', 'followMove']
@@ -138,6 +139,16 @@ class ExportConfig extends React.Component {
           // keep config minimal by removing `false` value boolean flags
           delete obj[key]
         }
+      })
+    }
+
+    const normalizeEvents = json => {
+      json.spec.subjects.map(subject => {
+        subject.events.map(event => {
+          if (EVENT_MAP[event]) {
+            subject.events = subject.events.filter(evt => !EVENT_MAP[event].includes(evt))
+          }
+        })
       })
     }
 
@@ -160,14 +171,15 @@ class ExportConfig extends React.Component {
     }
 
     removeEmpty(json)
+    normalizeEvents(json)
     return deepSort(json)
   }
 
   getObjectConfigYAML(json) {
-    return yaml.safeDump(json, {
+    return `---\n${yaml.safeDump(json, {
       noArrayIndent: true,
       sortKeys: true,
-    })
+    })}`
   }
 
   render() {
@@ -360,6 +372,10 @@ class ExportConfig extends React.Component {
         .output-syntax pre,
         .output-syntax code {
           background-color: transparent;
+        }
+
+        .output-syntax code {
+          padding: 1.5rem 1rem;
         }
         `}</style>
       </div>

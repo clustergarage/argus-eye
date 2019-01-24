@@ -129,8 +129,7 @@ class FileTree extends React.Component {
           cursor: pointer;
         }
 
-        .file-path .selected i.check svg polyline,
-        table td label.option i svg polyline {
+        .file-path .selected i.check svg polyline {
           color: #27ab83;
         }
 

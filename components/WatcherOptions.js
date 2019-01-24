@@ -10,7 +10,7 @@ import {
   Minus,
 } from 'react-feather'
 
-import {mapState, mapDispatch} from '../reducers/object-config'
+import {EVENT_MAP, mapState, mapDispatch} from '../reducers/object-config'
 import {formatLabels, tagsToObject} from '../util/util'
 
 class WatcherOptions extends React.Component {
@@ -148,7 +148,7 @@ class WatcherOptions extends React.Component {
               <button type="button"
                 className={`button button-small ${this.props.subject.events.indexOf(event) === -1 ? 'button-outline' : ''}`}
                 onClick={() => this.handleEventChange(event)}>
-                {event}{['close', 'move', 'all'].indexOf(event) > -1 ? ' *' : ''}
+                {event}{EVENT_MAP[event] ? ' *' : ''}
               </button>
             </span>))}
           </div>

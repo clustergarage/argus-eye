@@ -197,6 +197,11 @@ class Watchers extends React.Component {
           padding: 0.1rem 0.2rem;
         }
         `}</style>
+        <style global jsx>{`
+        table td label.option i svg polyline {
+          color: #27ab83;
+        }
+        `}</style>
       </div>
     )
   }
