@@ -15,7 +15,8 @@ import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
 
 import {VERSION} from '../constants'
-import {EVENT_MAP, mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
+import {EVENT_MAP, mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
+import {mapState as mapWatchersState, mapDispatch as mapWatchersDispatch} from '../reducers/watchers'
 import {applyArgusWatcher} from '../lib/api'
 
 const ReactHint = ReactHintFactory(React)
@@ -104,6 +105,7 @@ class ExportConfig extends React.Component {
     const json = this.getObjectConfigJSON()
     const {namespace, name} = json.metadata
     const response = await applyArgusWatcher(namespace, name, json)
+    this.props.dispatchCreateWatcher(json)
     // @TODO: add spinner, message, complete, error
   }
 
@@ -399,7 +401,12 @@ class ExportConfig extends React.Component {
 }
 
 const mapState = state => (Object.assign({}, {
-  objectConfig: mapConfigState(state),
-}))
+    objectConfig: mapConfigState(state)
+  },
+  mapWatchersState(state)))
+
+const mapDispatch = dispatch => (Object.assign({},
+  mapConfigDispatch(dispatch),
+  mapWatchersDispatch(dispatch)))
 
 export default connect(mapState, mapDispatch)(ExportConfig)

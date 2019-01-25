@@ -57,7 +57,7 @@ class Watchers extends React.Component {
     }
 
     let i, j, k, l
-    let subject, parts, cp, files
+    let subject, parts, cp
 
     for (i = 0; i < containers.length; ++i) {
       cid = containers[i].containerID
@@ -80,9 +80,13 @@ class Watchers extends React.Component {
               this.props.toggleVisibility(cp)
             }
             if (!this.props.openedDirectories[cp]) {
-              files = await loadFSTree(cp)
-              if (files.length) {
-                this.props.dispatchOpenDirectory(cp, files)
+              try {
+                const files = await loadFSTree(cp)
+                if (files.length) {
+                  this.props.dispatchOpenDirectory(cp, files)
+                }
+              } catch(e) {
+                console.error(e)
               }
             }
           }
