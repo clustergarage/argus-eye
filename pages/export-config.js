@@ -102,8 +102,8 @@ class ExportConfig extends React.Component {
 
   async handleDeployToClusterClick() {
     const json = this.getObjectConfigJSON()
-    const response = await applyArgusWatcher(json.metadata.namespace,
-      json.metadata.name, json)
+    const {namespace, name} = json.metadata
+    const response = await applyArgusWatcher(namespace, name, json)
     // @TODO: add spinner, message, complete, error
   }
 

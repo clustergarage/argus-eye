@@ -13,6 +13,10 @@ const handle = app.getRequestHandler()
 // @TODO: add other container runtimes
 const docker = new dockerode({socketPath: '/var/run/docker.sock'})
 
+const CRD_GROUP = 'arguscontroller.clustergarage.io'
+const CRD_VERSION = 'v1alpha1'
+const CRD_RESOURCE = 'arguswatchers'
+
 // @FIXME: https://github.com/kubernetes-client/javascript/issues/19
 // until this is fixed, the patch* commands are not setting the proper headers
 class K8sCustomObjectsApi extends k8s.Custom_objectsApi {
@@ -33,20 +37,20 @@ kc.loadFromDefault()
 const k8sApi = kc.makeApiClient(k8s.Core_v1Api)
 const k8sCustomApi = kc.makeApiClient(K8sCustomObjectsApi/*k8s.Custom_objectsApi*/)
 
-const ARGUSWATCHER_GROUP = 'arguscontroller.clustergarage.io'
-const ARGUSWATCHER_VERSION = 'v1alpha1'
-const ARGUSWATCHER_RESOURCE = 'arguswatchers'
-
 app.prepare()
   .then(() => {
     const server = express()
     server.use(bodyParser.urlencoded({extended: true}))
     server.use(bodyParser.json())
 
+    //=========================================================================
+    //= KUBERNETES - API
+
     server.get('/k8s/pods/:selector', (req, res) => {
       assert(req.params.selector)
       k8sApi.listPodForAllNamespaces(null, null, null, req.params.selector)
         .then(result => res.send(result.body))
+        .catch(e => console.error(e))
     })
 
     server.get('/k8s/:namespace/pod/:name/containers', (req, res) => {
@@ -54,12 +58,17 @@ app.prepare()
       assert(req.params.name)
       k8sApi.readNamespacedPod(req.params.name, req.params.namespace)
         .then(result => res.send(result.body))
+        .catch(e => console.error(e))
     })
 
+    //=========================================================================
+    //= KUBERNETES - Custom objects API
+
     server.get('/k8s/arguswatchers', (req, res) => {
-      k8sCustomApi.listClusterCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
-        ARGUSWATCHER_RESOURCE/*, null, null, null, true*/) // watch -> response.on('data', chunk => chunk)
+      k8sCustomApi.listClusterCustomObject(CRD_GROUP, CRD_VERSION,
+        CRD_RESOURCE/*, null, null, null, true*/) // watch -> response.on('data', chunk => chunk)
         .then(result => res.send(result.body))
+        .catch(e => console.error(e))
     })
 
     server.post('/k8s/:namespace/arguswatcher/:name', (req, res) => {
@@ -69,25 +78,39 @@ app.prepare()
       const name = req.params.name
 
       // try to get existing arguswatcher in namespace/name form
-      k8sCustomApi.getNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
-        namespace, ARGUSWATCHER_RESOURCE, name)
+      k8sCustomApi.getNamespacedCustomObject(CRD_GROUP, CRD_VERSION,
+        namespace, CRD_RESOURCE, name)
         .then(() => {
           // existing object needs to be patched
-          k8sCustomApi.patchNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
-            namespace, ARGUSWATCHER_RESOURCE, name, req.body)
+          k8sCustomApi.patchNamespacedCustomObject(CRD_GROUP, CRD_VERSION,
+            namespace, CRD_RESOURCE, name, req.body)
             .then(result => res.send(result.body))
             .catch(e => console.error(e.body))
         }, reject => {
           if (reject.body.reason === 'NotFound') {
             // no object with this name exists, create new object
-            k8sCustomApi.createNamespacedCustomObject(ARGUSWATCHER_GROUP, ARGUSWATCHER_VERSION,
-              namespace, ARGUSWATCHER_RESOURCE, req.body)
+            k8sCustomApi.createNamespacedCustomObject(CRD_GROUP, CRD_VERSION,
+              namespace, CRD_RESOURCE, req.body)
               .then(result => res.send(result.body))
               .catch(e => console.error(e.body))
           }
         })
         .catch(e => console.error(e))
     })
+
+    server.delete('/k8s/:namespace/arguswatcher/:name', (req, res) => {
+      assert(req.params.namespace)
+      assert(req.params.name)
+      k8sCustomApi.deleteNamespacedCustomObject(CRD_GROUP, CRD_VERSION,
+        req.params.namespace, CRD_RESOURCE, req.params.name, {
+          apiVersion: `${CRD_GROUP}/${CRD_VERSION}`,
+        })
+        .then(result => res.send(result.body))
+        .catch(e => console.error(e))
+    })
+
+    //=========================================================================
+    //= DOCKER
 
     server.get('/docker/container/:id/pid', (req, res) => {
       assert(req.params.id)

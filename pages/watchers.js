@@ -8,14 +8,26 @@ import {mapState as mapSearchState, mapDispatch as mapSearchDispatch} from '../r
 import {mapState as mapTreeState, mapDispatch as mapTreeDispatch} from '../reducers/file-tree'
 import {mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
 import {mapState as mapWatchersState, mapDispatch as mapWatchersDispatch} from '../reducers/watchers'
-import {searchPods, podContainers, containerPID, loadFSTree} from '../lib/api'
+import {
+  searchPods,
+  podContainers,
+  containerPID,
+  loadFSTree,
+  deleteArgusWatcher,
+} from '../lib/api'
 import {formatLabels} from '../util/util'
 
 class Watchers extends React.Component {
   constructor(props) {
     super(props)
+    this.state = {
+      deleteToggle: {}
+    }
 
     this.handleEditClick = this.handleEditClick.bind(this)
+    this.handleDeleteClick = this.handleDeleteClick.bind(this)
+    this.handleConfirmDeleteClick = this.handleConfirmDeleteClick.bind(this)
+    this.handleCancelDeleteClick = this.handleCancelDeleteClick.bind(this)
   }
 
   async handleEditClick(watcher) {
@@ -81,6 +93,32 @@ class Watchers extends React.Component {
     Router.push('/')
   }
 
+  handleDeleteClick(watcher, index) {
+    this.toggleDelete(index, true)
+  }
+
+  async handleConfirmDeleteClick(watcher, index) {
+    const {namespace, name} = watcher.metadata
+    const response = await deleteArgusWatcher(namespace, name)
+    this.props.dispatchDeleteWatcher(index)
+    this.toggleDelete(index, false)
+    // @TODO: if current objectConfig in state, reset
+    // @TODO: add spinner, message, complete, error
+  }
+
+  handleCancelDeleteClick(index) {
+    this.toggleDelete(index, false)
+  }
+
+  toggleDelete(index, value) {
+    this.setState({
+      deleteToggle: {
+        ...this.state.deleteToggle,
+        [index]: value,
+      }
+    })
+  }
+
   // @TODO: store in a shared location [for pages/index | pages/watchers]
   async loadPods(selector) {
     const pods = await searchPods(selector)
@@ -117,120 +155,185 @@ class Watchers extends React.Component {
                 </tr>
               </thead>
               <tbody>
-                {this.props.watchers.map(watcher => (
-                <tr key={watcher.metadata.uid}>
-                  <td className="buttons">
-                    <button type="button"
-                      className="button button-small"
-                      onClick={() => this.handleEditClick(watcher)}>
-                      edit
-                    </button>
-                    <button type="button"
-                      className="button button-small">
-                      delete
-                    </button>
-                  </td>
-                  <td>
-                    {watcher.metadata.namespace} /&nbsp;
-                    <a>{watcher.metadata.name}</a>
-                  </td>
-                  <td className="selector">
-                    <small>
-                      {Object.keys(watcher.spec.selector.matchLabels).map((key, index) => (
-                      <div key={index}>
-                        <em>{key}={watcher.spec.selector.matchLabels[key]}</em>
-                      </div>
-                      ))}
-                    </small>
-                  </td>
-                  <td className="subjects">
-                    {watcher.spec.subjects.map((subject, index) => (
-                    <div key={index} className="subject">
-                      <label>
-                        <b>paths</b>
-                        <div>
-                          <small>
-                            {subject.paths.map((path, idx) => (
-                            <span key={idx}>
-                              <em>{path}</em><br />
-                            </span>
-                            ))}
-                          </small>
+                {this.props.watchers.map((watcher, index) => (
+                <React.Fragment key={watcher.metadata.uid}>
+                  <tr key={watcher.metadata.uid}
+                    className={this.state.deleteToggle[index] ? 'toggled' : ''}>
+                    <td className="buttons">
+                      <button type="button"
+                        className="button button-small"
+                        onClick={() => this.handleEditClick(watcher)}>
+                        edit
+                      </button>
+                      <button type="button"
+                        className="button button-small"
+                        onClick={() => this.handleDeleteClick(watcher, index)}>
+                        delete
+                      </button>
+                    </td>
+                    <td>
+                      {watcher.metadata.namespace} /&nbsp;
+                      <a>{watcher.metadata.name}</a>
+                    </td>
+                    <td className="selector">
+                      <small>
+                        {Object.keys(watcher.spec.selector.matchLabels).map((key, index) => (
+                        <div key={index}>
+                          <em>{key}={watcher.spec.selector.matchLabels[key]}</em>
                         </div>
-                      </label>
-
-                      <label>
-                        <b>events</b>
-                        <div>
-                          <small>
-                            {subject.events.map((event, idx) => (
-                            <span key={idx}>
-                              <em>{event}</em>&nbsp;
-                            </span>
-                            ))}
-                          </small>
-                        </div>
-                      </label>
-
-                      {subject.recursive &&
-                      <label className="option">
-                        <i><CheckSquare size={18} /></i>
-                        <b>recursive</b>&nbsp;
-                        {subject.maxDepth &&
-                        <small>
-                          (max depth: <em>{subject.maxDepth}</em>)
-                        </small>}
-                        {(subject.ignore && subject.ignore.length > 0) &&
-                        <label className="ignore">
-                          <b>ignored</b>
+                        ))}
+                      </small>
+                    </td>
+                    <td className="subjects">
+                      {watcher.spec.subjects.map((subject, index) => (
+                      <div key={index} className="subject">
+                        <label>
+                          <b>paths</b>
                           <div>
                             <small>
-                              {subject.ignore.map((ignore, idx) => (
+                              {subject.paths.map((path, idx) => (
                               <span key={idx}>
-                                <em>{ignore}</em><br />
+                                <em>{path}</em><br />
                               </span>
                               ))}
                             </small>
                           </div>
-                        </label>}
-                      </label>}
+                        </label>
 
-                      {subject.onlyDir &&
-                      <label className="option">
-                        <i><CheckSquare size={18} /></i>
-                        <b>only directories</b>
-                      </label>}
+                        <label>
+                          <b>events</b>
+                          <div>
+                            <small>
+                              {subject.events.map((event, idx) => (
+                              <span key={idx}>
+                                <em>{event}</em>&nbsp;
+                              </span>
+                              ))}
+                            </small>
+                          </div>
+                        </label>
 
-                      {subject.followMove &&
-                      <label className="option">
-                        <i><CheckSquare size={18} /></i>
-                        <b>follow move events</b>
-                      </label>}
-
-                      {subject.tags &&
-                      <label>
-                        <b>tags</b>
-                        <div>
+                        {subject.recursive &&
+                        <label className="option">
+                          <i><CheckSquare size={18} /></i>
+                          <b>recursive</b>&nbsp;
+                          {subject.maxDepth &&
                           <small>
-                            <em>{formatLabels(subject.tags)}</em>
-                          </small>
+                            (max depth: <em>{subject.maxDepth}</em>)
+                          </small>}
+                          {(subject.ignore && subject.ignore.length > 0) &&
+                          <label className="ignore">
+                            <b>ignored</b>
+                            <div>
+                              <small>
+                                {subject.ignore.map((ignore, idx) => (
+                                <span key={idx}>
+                                  <em>{ignore}</em><br />
+                                </span>
+                                ))}
+                              </small>
+                            </div>
+                          </label>}
+                        </label>}
+
+                        {subject.onlyDir &&
+                        <label className="option">
+                          <i><CheckSquare size={18} /></i>
+                          <b>only directories</b>
+                        </label>}
+
+                        {subject.followMove &&
+                        <label className="option">
+                          <i><CheckSquare size={18} /></i>
+                          <b>follow move events</b>
+                        </label>}
+
+                        {subject.tags &&
+                        <label>
+                          <b>tags</b>
+                          <div>
+                            <small>
+                              <em>{formatLabels(subject.tags)}</em>
+                            </small>
+                          </div>
+                        </label>}
+                      </div>
+                      ))}
+                    </td>
+                    <td className="created">
+                      <Moment format="MM/DD/YYYY HH:mm:ss">
+                        {watcher.metadata.creationTimestamp}
+                      </Moment>
+                    </td>
+                  </tr>
+                  <tr className={`overlay ${this.state.deleteToggle[index] ? 'toggled' : ''}`}>
+                    <td colSpan="5">
+                      <div className="wrapper">
+                        <h5>
+                          Delete <b>{watcher.metadata.namespace} /&nbsp;
+                          <a>{watcher.metadata.name}</a></b>?
+                        </h5>
+                        Doing so will permanently remove the watcher from your cluster.
+                        <div className="buttons">
+                          <button type="button"
+                            className="button button-small"
+                            onClick={() => this.handleConfirmDeleteClick(watcher, index)}>
+                            Delete
+                          </button>
+                          <button type="button"
+                            className="button button-small button-outline"
+                            onClick={() => this.handleCancelDeleteClick(index)}>
+                            Cancel
+                          </button>
                         </div>
-                      </label>}
-                    </div>
-                    ))}
-                  </td>
-                  <td className="created">
-                    <Moment format="MM/DD/YYYY HH:mm:ss">
-                      {watcher.metadata.creationTimestamp}
-                    </Moment>
-                  </td>
-                </tr>))}
+                      </div>
+                    </td>
+                  </tr>
+                </React.Fragment>))}
               </tbody>
             </table>
           </div>
         </div>
 
         <style jsx>{`
+        table tr {
+          visibility: visible;
+        }
+
+        table tr.toggled {
+          visibility: collapse;
+        }
+
+        table tr.overlay {
+          visibility: collapse;
+          opacity: 0;
+          transition: opacity 1s ease-out;
+        }
+
+        table tr.overlay.toggled {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        table tr.overlay td .wrapper {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 1s ease-out;
+        }
+
+        table tr.overlay.toggled td .wrapper {
+          height: auto;
+          max-height: 500px;
+        }
+
+        table tr.overlay td {
+          text-align: center;
+        }
+
+        table tr.overlay td h5 {
+          margin-bottom: 1rem;
+        }
+
         table th,
         table td {
           font-size: 1.4rem;
@@ -247,8 +350,13 @@ class Watchers extends React.Component {
           white-space: nowrap;
         }
 
-        table td.buttons .button {
+        table td.buttons .button,
+        table tr.overlay .buttons .button {
           margin-right: 0.5rem;
+        }
+
+        table tr.overlay .buttons {
+          margin-top: 1.5rem;
         }
 
         table td.subjects {
