@@ -2,7 +2,7 @@
   "name": "argus-eye",
   "version": "0.1.0",
   "description": "",
-  "main": "read-dir.js",
+  "main": "server.js",
   "scripts": {
     "dev": "node server.js",
     "build": "next build",

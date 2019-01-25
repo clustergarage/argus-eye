@@ -1,4 +1,5 @@
 import React from 'react'
+import Router from 'next/router'
 import Moment from 'react-moment'
 import {connect} from 'react-redux'
 import {Check, CheckSquare, ChevronRight} from 'react-feather'
@@ -27,50 +28,57 @@ class Watchers extends React.Component {
     // get found pods => update state :: search with data
     const pods = await this.loadPods(labelSelector)
     let pid, cid
-    if (pods.length) {
-      const containers = await this.selectPod(pods[0])
-      if (containers.length > 1) {
-        this.props.dispatchSetContainers(containers.map(container => {
-          return Object.keys(container)
-            .filter(key => ['containerID', 'name'].includes(key))
-            .reduce((obj, key) => {
-              obj[key] = container[key]
-              return obj
-            }, {})
-        }))
+    if (!pods.length) {
+      return
+    }
+
+    const containers = await this.selectPod(pods[0])
+    if (containers.length > 1) {
+      this.props.dispatchSetContainers(containers.map(container => {
+        return Object.keys(container)
+          .filter(key => ['containerID', 'name'].includes(key))
+          .reduce((obj, key) => {
+            obj[key] = container[key]
+            return obj
+          }, {})
+      }))
+    }
+
+    let i, j, k, l
+    let subject, parts, cp, files
+
+    for (i = 0; i < containers.length; ++i) {
+      cid = containers[i].containerID
+      pid = await containerPID(cid)
+      if (i === 0) {
+        this.props.dispatchSelectSubject(i)
+        this.props.dispatchSetRootDirectory(cid, `/proc/${pid}/root`)
       }
 
-      for (let i = 0; i < containers.length; ++i) {
-        cid = containers[i].containerID
-        pid = await containerPID(cid)
-        if (i === 0) {
-          this.props.dispatchSelectSubject(i)
-          this.props.dispatchSetRootDirectory(cid, `/proc/${pid}/root`)
-        }
+      for (j = 0; j < watcher.spec.subjects.length; ++j) {
+        subject = watcher.spec.subjects[j]
+        for (k = 0; k < subject.paths.length; ++k) {
+          parts = subject.paths[k].split('/')
+          parts = parts.slice(1, parts.length - 1)
 
-        for (let j = 0; j < watcher.spec.subjects.length; ++j) {
-          let subject = watcher.spec.subjects[j]
-          for (let k = 0; k < subject.paths.length; ++k) {
-            let parts = subject.paths[k].split('/')
-            parts = parts.slice(1, parts.length - 1)
-
-            let cp = `/proc/${pid}/root`
-            for (let i = 0; i < parts.length; ++i) {
-              cp += '/' + parts[i]
-              if (!this.props.isVisible[cp]) {
-                this.props.toggleVisibility(cp)
-              }
-              if (!this.props.openedDirectories[cp]) {
-                let files = await loadFSTree(cp)
-                if (files.length) {
-                  this.props.dispatchOpenDirectory(cp, files)
-                }
+          cp = `/proc/${pid}/root`
+          for (l = 0; l < parts.length; ++l) {
+            cp += '/' + parts[l]
+            if (!this.props.isVisible[cp]) {
+              this.props.toggleVisibility(cp)
+            }
+            if (!this.props.openedDirectories[cp]) {
+              files = await loadFSTree(cp)
+              if (files.length) {
+                this.props.dispatchOpenDirectory(cp, files)
               }
             }
           }
         }
       }
     }
+
+    Router.push('/')
   }
 
   // @TODO: store in a shared location [for pages/index | pages/watchers]

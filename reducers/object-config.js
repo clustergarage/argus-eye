@@ -1,3 +1,4 @@
+import {API_VERSION, KIND} from '../constants'
 import {tagsToObject, containsAll} from '../util/util'
 
 const SET_NAME = 'SET_NAME'
@@ -17,10 +18,6 @@ const SET_LOG_FORMAT = 'SET_LOG_FORMAT'
 const CLEAR_CONFIG_STATE = 'CLEAR_CONFIG_STATE'
 const REPLACE_CONFIG_STATE = 'REPLACE_CONFIG_STATE'
 
-const VERSION = 'v0.1.0'
-const API_VERSION = 'arguscontroller.clustergarage.io/v1alpha1'
-const KIND = 'ArgusWatcher'
-
 export const EVENT_MAP = {
   close: ['closewrite', 'closenowrite'],
   move: ['movedfrom', 'movedto'],
@@ -34,12 +31,7 @@ export const EVENT_MAP = {
 const initialState = {
   apiVersion: API_VERSION,
   kind: KIND,
-  metadata: {
-    annotations: {
-      'clustergarage.io/generated-by': 'argus-eye',
-      'clustergarage.io/argus-eye.version': VERSION,
-    },
-  },
+  metadata: {},
   spec: {
     selector: {
       matchLabels: {}

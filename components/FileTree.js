@@ -17,7 +17,9 @@ class FileTree extends React.Component {
   }
 
   componentDidMount() {
-    this.state.files.length || this.loadDirectory()
+    if (!this.state.files.length) {
+      this.loadDirectory()
+    }
   }
 
   componentDidUpdate({directory, files}) {

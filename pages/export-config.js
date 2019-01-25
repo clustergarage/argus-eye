@@ -14,6 +14,7 @@ import {github} from 'react-syntax-highlighter/dist/styles/hljs'
 import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
 
+import {VERSION} from '../constants'
 import {EVENT_MAP, mapState as mapConfigState, mapDispatch} from '../reducers/object-config'
 import {applyArgusWatcher} from '../lib/api'
 
@@ -118,7 +119,7 @@ class ExportConfig extends React.Component {
   }
 
   onRenderTooltipContent(key) {
-    return (<div className="react-hint__content">{this.state.tooltip[key]}</div>)
+    return <div className="react-hint__content">{this.state.tooltip[key]}</div>
   }
 
   getObjectConfigJSON() {
@@ -142,9 +143,18 @@ class ExportConfig extends React.Component {
       })
     }
 
-    // @TODO: remove metadata
-    // annotations:
-    //   kubectl.kubernetes.io/last-applied-configuration
+    const normalizeMetadata = json => {
+      json.metadata.annotations = json.metadata.annotations || {}
+      Object.keys(json.metadata.annotations).map(key => {
+        if (key === 'kubectl.kubernetes.io/last-applied-configuration') {
+          delete json.metadata.annotations[key]
+        }
+      })
+      Object.assign(json.metadata.annotations, {
+        'clustergarage.io/generated-by': 'argus-eye',
+        'clustergarage.io/argus-eye.version': VERSION,
+      })
+    }
 
     const normalizeEvents = json => {
       json.spec.subjects.map(subject => {
@@ -175,6 +185,7 @@ class ExportConfig extends React.Component {
     }
 
     removeEmpty(json)
+    normalizeMetadata(json)
     normalizeEvents(json)
     return deepSort(json)
   }
@@ -256,7 +267,7 @@ class ExportConfig extends React.Component {
           </div>
         </div>
         <div className="row">
-          <div className="column">
+          <div className="column column-50">
             <h3>YAML</h3>
             <div className="output-syntax">
               <ReactHint attribute="data-yaml"
@@ -277,7 +288,7 @@ class ExportConfig extends React.Component {
               </SyntaxHighlighter>
             </div>
           </div>
-          <div className="column">
+          <div className="column column-50">
             <h3>JSON</h3>
             <div className="output-syntax">
               <ReactHint attribute="data-json"
