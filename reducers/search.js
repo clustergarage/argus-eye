@@ -3,6 +3,7 @@ const SET_PODS = 'SET_PODS'
 const SET_CONTAINERS = 'SET_CONTAINERS'
 const SET_ROOT_DIRECTORY = 'SET_ROOT_DIRECTORY'
 const SET_SELECTED_SUBJECT = 'SET_SELECTED_SUBJECT'
+const SET_EDITING = 'SET_EDITING'
 const CLEAR_SEARCH_STATE = 'CLEAR_SEARCH_STATE'
 
 const initialState = {
@@ -12,6 +13,7 @@ const initialState = {
   directory: '',
   selectedContainer: '',
   selectedSubject: null,
+  editing: null,
 }
 
 const reducer = (state = initialState, action) => {
@@ -32,6 +34,9 @@ const reducer = (state = initialState, action) => {
       break
     case SET_SELECTED_SUBJECT:
       newState.selectedSubject = action.index
+      break
+    case SET_EDITING:
+      newState.editing = action.index
       break
     case CLEAR_SEARCH_STATE:
       Object.assign(newState, {
@@ -55,6 +60,7 @@ export const setPods = pods => ({type: SET_PODS, pods})
 export const setContainers = containers => ({type: SET_CONTAINERS, containers})
 export const setRootDirectory = (cid, directory) => ({type: SET_ROOT_DIRECTORY, cid, directory})
 export const setSelectedSubject = index => ({type: SET_SELECTED_SUBJECT, index})
+export const setEditing = index => ({type: SET_EDITING, index})
 export const clearSearchState = () => ({type: CLEAR_SEARCH_STATE})
 
 export const mapState = state => ({
@@ -64,6 +70,7 @@ export const mapState = state => ({
   directory: state.search.directory,
   selectedContainer: state.search.selectedContainer,
   selectedSubject: state.search.selectedSubject,
+  editing: state.search.editing,
 })
 
 export const mapDispatch = dispatch => ({
@@ -72,5 +79,6 @@ export const mapDispatch = dispatch => ({
   dispatchSetContainers: containers => dispatch(setContainers(containers)),
   dispatchSetRootDirectory: (cid, directory) => dispatch(setRootDirectory(cid, directory)),
   dispatchSelectSubject: index => dispatch(setSelectedSubject(index)),
+  dispatchSetEditing: index => dispatch(setEditing(index)),
   dispatchClearSearchState: () => dispatch(clearSearchState()),
 })

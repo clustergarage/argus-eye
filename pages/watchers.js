@@ -30,7 +30,10 @@ class Watchers extends React.Component {
     this.handleCancelDeleteClick = this.handleCancelDeleteClick.bind(this)
   }
 
-  async handleEditClick(watcher) {
+  async handleEditClick(watcher, index) {
+    // @TODO: better ES6 deep-copy
+    watcher = JSON.parse(JSON.stringify(watcher))
+
     this.props.dispatchClearSearchState()
     this.props.dispatchReplaceConfigState(watcher)
 
@@ -94,6 +97,7 @@ class Watchers extends React.Component {
       }
     }
 
+    this.props.dispatchSetEditing(index)
     Router.push('/')
   }
 
@@ -144,6 +148,17 @@ class Watchers extends React.Component {
   }
 
   render() {
+    const getRowClass = index => {
+      let classes = []
+      if (this.props.editing === index) {
+        classes.push('editing')
+      }
+      if (this.state.deleteToggle[index]) {
+        classes.push('toggled')
+      }
+      return classes.join(' ')
+    }
+
     return (
       <div className="container">
         <div className="row">
@@ -162,12 +177,13 @@ class Watchers extends React.Component {
                 {this.props.watchers.map((watcher, index) => (
                 <React.Fragment key={watcher.metadata.uid}>
                   <tr key={watcher.metadata.uid}
-                    className={this.state.deleteToggle[index] ? 'toggled' : ''}>
+                    className={getRowClass(index)}>
                     <td className="buttons">
                       <button type="button"
+                        disabled={this.props.editing === index}
                         className="button button-small"
-                        onClick={() => this.handleEditClick(watcher)}>
-                        edit
+                        onClick={() => this.handleEditClick(watcher, index)}>
+                        {this.props.editing === index ? 'editing' : 'edit'}
                       </button>
                       <button type="button"
                         className="button button-small"

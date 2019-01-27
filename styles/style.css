@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
 
+input[type="text"]:disabled,
 input[type="text"]::placeholder {
   color: #bcccdc;
   font-style: italic;

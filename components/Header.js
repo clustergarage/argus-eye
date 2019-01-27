@@ -1,13 +1,29 @@
 import React from 'react'
+import Link from 'next/link'
 import {withRouter} from 'next/router'
 import {connect} from 'react-redux'
 import {Eye} from 'react-feather'
 
 import ActiveLink from './ActiveLink'
 
-import {mapState, mapDispatch} from '../reducers/watchers'
+import {mapState as mapSearchState, mapDispatch as mapSearchDispatch} from '../reducers/search'
+import {mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
+import {mapState as mapWatchersState, mapDispatch as mapWatchersDispatch} from '../reducers/watchers'
 
 class Header extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.handleStopEditingClick = this.handleStopEditingClick.bind(this)
+  }
+
+  handleStopEditingClick() {
+    this.props.dispatchSetEditing(null)
+    this.props.dispatchClearSearchState()
+    this.props.dispatchClearConfigState()
+    this.props.dispatchSetLabelSelector('')
+  }
+
   render() {
     return (
       <div>
@@ -31,6 +47,25 @@ class Header extends React.Component {
           </ActiveLink>
         </div>
 
+        {this.props.editing !== null &&
+        <div className="editing">
+          <button className="button button-small"
+            onClick={this.handleStopEditingClick}>
+            stop editing
+          </button>
+          <h5>
+            Editing <b>{this.props.metadata.namespace} /&nbsp;
+            <a>{this.props.metadata.name}</a></b>
+          </h5>
+          <div>
+            You are editing an existing watcher.
+            Once you are done making changes,&nbsp;
+            <Link href="/export-config">
+              <a>export or apply changes</a>
+            </Link> in the cluster.
+          </div>
+        </div>}
+
         <style jsx>{`
         h1 {
           margin-left: 2rem;
@@ -39,6 +74,35 @@ class Header extends React.Component {
         h1 i {
           vertical-align: sub;
           margin-top: 1rem;
+        }
+
+        .editing {
+          position: relative;
+          font-size: 1.4rem;
+          background-color: #effcf6;
+          margin-bottom: 3rem;
+          padding: 2rem 3rem 2.5rem;
+          border-radius: 1rem;
+        }
+
+        .editing h5 {
+          margin-bottom: 1rem;
+        }
+
+        .editing .button {
+          position: absolute;
+          top: 1rem;
+          right: 3rem;
+          color: #000;
+          background-color: #c6f7e2;
+          border-color: #c6f7e2;
+          margin-top: 1rem;
+        }
+
+        .editing .button:hover {
+          color: #fff;
+          background-color: #606c76;
+          border-color: #606c76;
         }
         `}</style>
         <style global jsx>{`
@@ -80,5 +144,15 @@ class Header extends React.Component {
     )
   }
 }
+
+const mapState = state => (Object.assign({},
+  mapSearchState(state),
+  mapConfigState(state),
+  mapWatchersState(state)))
+
+const mapDispatch = dispatch => (Object.assign({},
+  mapSearchDispatch(dispatch),
+  mapConfigDispatch(dispatch),
+  mapWatchersDispatch(dispatch)))
 
 export default withRouter(connect(mapState, mapDispatch)(Header))

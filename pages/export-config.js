@@ -15,7 +15,8 @@ import ReactHintFactory from 'react-hint'
 import 'react-hint/css/index.css'
 
 import {VERSION} from '../constants'
-import {EVENT_MAP, mapState as mapConfigState, mapDispatch as mapConfigDispatch} from '../reducers/object-config'
+import {mapState as mapSearchState, mapDispatch as mapSearchDispatch} from '../reducers/search'
+import {mapState as mapConfigState, mapDispatch as mapConfigDispatch, EVENT_MAP} from '../reducers/object-config'
 import {mapState as mapWatchersState, mapDispatch as mapWatchersDispatch} from '../reducers/watchers'
 import {applyArgusWatcher} from '../lib/api'
 
@@ -43,6 +44,16 @@ class ExportConfig extends React.Component {
     this.handleTooltipClick = this.handleTooltipClick.bind(this)
     this.handleTooltipLeave = this.handleTooltipLeave.bind(this)
     this.onRenderTooltipContent = this.onRenderTooltipContent.bind(this)
+  }
+
+  componentDidUpdate({objectConfig: oldObjectConfig}) {
+    const {namespace, name} = this.props.objectConfig.metadata
+    if (namespace !== oldObjectConfig.metadata.namespace) {
+      this.setState({namespace})
+    }
+    if (name !== oldObjectConfig.metadata.name) {
+      this.setState({name})
+    }
   }
 
   checkIsDisabled() {
@@ -117,7 +128,12 @@ class ExportConfig extends React.Component {
 
   handleTooltipLeave(event, key) {
     event.preventDefault()
-    this.setState({tooltip: {...this.state.tooltip, [key]: COPY_TOOLTIP}})
+    this.setState({
+      tooltip: {
+        ...this.state.tooltip,
+        [key]: COPY_TOOLTIP,
+      }
+    })
   }
 
   onRenderTooltipContent(key) {
@@ -146,13 +162,19 @@ class ExportConfig extends React.Component {
     }
 
     const normalizeMetadata = json => {
-      json.metadata.annotations = json.metadata.annotations || {}
-      Object.keys(json.metadata.annotations).map(key => {
-        if (key === 'kubectl.kubernetes.io/last-applied-configuration') {
-          delete json.metadata.annotations[key]
+      Object.keys(json.metadata).map(key => {
+        if (json.metadata[key] === '') {
+          delete json.metadata[key]
         }
       })
-      Object.assign(json.metadata.annotations, {
+
+      let annotations = json.metadata.annotations || {}
+      Object.keys(annotations).map(key => {
+        if (key === 'kubectl.kubernetes.io/last-applied-configuration') {
+          delete annotations[key]
+        }
+      })
+      Object.assign(annotations, {
         'clustergarage.io/generated-by': 'argus-eye',
         'clustergarage.io/argus-eye.version': VERSION,
       })
@@ -220,6 +242,7 @@ class ExportConfig extends React.Component {
               <small>(required)</small>
               <input type="text"
                 value={this.state.name}
+                disabled={this.props.editing !== null}
                 onChange={this.handleNameChange}
                 placeholder="mywatcher" />
             </label>
@@ -229,6 +252,7 @@ class ExportConfig extends React.Component {
               Namespace
               <input type="text"
                 value={this.state.namespace}
+                disabled={this.props.editing !== null}
                 onChange={this.handleNamespaceChange}
                 placeholder="mynamespace" />
             </label>
@@ -400,12 +424,13 @@ class ExportConfig extends React.Component {
   }
 }
 
-const mapState = state => (Object.assign({}, {
-    objectConfig: mapConfigState(state)
-  },
+const mapState = state => (Object.assign({},
+  mapSearchState(state),
+  {objectConfig: mapConfigState(state)},
   mapWatchersState(state)))
 
 const mapDispatch = dispatch => (Object.assign({},
+  mapSearchDispatch(dispatch),
   mapConfigDispatch(dispatch),
   mapWatchersDispatch(dispatch)))
 

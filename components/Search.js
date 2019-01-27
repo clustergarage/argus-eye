@@ -16,6 +16,13 @@ class Search extends React.Component {
     this.handleContainerClick = this.handleContainerClick.bind(this)
   }
 
+  componentDidUpdate({labelSelector: oldLabelSelector}) {
+    const {labelSelector} = this.props
+    if (labelSelector !== oldLabelSelector) {
+      this.setState({labelSelector})
+    }
+  }
+
   handleLabelSelectorChange(event) {
     this.setState({labelSelector: event.target.value})
   }

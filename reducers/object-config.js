@@ -31,7 +31,10 @@ export const EVENT_MAP = {
 const initialState = {
   apiVersion: API_VERSION,
   kind: KIND,
-  metadata: {},
+  metadata: {
+    name: '',
+    namespace: '',
+  },
   spec: {
     selector: {
       matchLabels: {}
@@ -147,9 +150,18 @@ const reducer = (state = initialState, action) => {
       newState.spec.logFormat = action.value
       break
     case CLEAR_CONFIG_STATE:
-      Object.assign(newState.spec, {
-        subjects: [],
-        logFormat: null,
+      Object.assign(newState, {
+        metadata: {
+          name: '',
+          namespace: '',
+        },
+        spec: {
+          selector: {
+            matchLabels: {}
+          },
+          subjects: [],
+          logFormat: null,
+        }
       })
       break
     case REPLACE_CONFIG_STATE:
