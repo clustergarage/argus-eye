@@ -116,7 +116,11 @@ class ExportConfig extends React.Component {
     const json = this.getObjectConfigJSON()
     const {namespace, name} = json.metadata
     const response = await applyArgusWatcher(namespace, name, json)
-    this.props.dispatchCreateWatcher(json)
+    if (this.props.editing !== null) {
+      this.props.dispatchUpdateWatcher(json, this.props.editing)
+    } else {
+      this.props.dispatchCreateWatcher(json)
+    }
     // @TODO: add spinner, message, complete, error
   }
 
@@ -168,15 +172,14 @@ class ExportConfig extends React.Component {
         }
       })
 
-      let annotations = json.metadata.annotations || {}
+      let annotations = Object.assign({}, json.metadata.annotations, {
+        'clustergarage.io/generated-by': 'argus-eye',
+        'clustergarage.io/argus-eye.version': VERSION,
+      })
       Object.keys(annotations).map(key => {
         if (key === 'kubectl.kubernetes.io/last-applied-configuration') {
           delete annotations[key]
         }
-      })
-      Object.assign(annotations, {
-        'clustergarage.io/generated-by': 'argus-eye',
-        'clustergarage.io/argus-eye.version': VERSION,
       })
     }
 

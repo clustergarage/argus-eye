@@ -34,6 +34,7 @@ const initialState = {
   metadata: {
     name: '',
     namespace: '',
+    uid: '',
   },
   spec: {
     selector: {
@@ -150,18 +151,14 @@ const reducer = (state = initialState, action) => {
       newState.spec.logFormat = action.value
       break
     case CLEAR_CONFIG_STATE:
-      Object.assign(newState, {
-        metadata: {
-          name: '',
-          namespace: '',
-        },
-        spec: {
-          selector: {
-            matchLabels: {}
-          },
-          subjects: [],
-          logFormat: null,
-        }
+      Object.assign(newState.metadata, {
+        name: '',
+        namespace: '',
+        uid: '',
+      })
+      Object.assign(newState.spec, {
+        subjects: [],
+        logFormat: null,
       })
       break
     case REPLACE_CONFIG_STATE:
@@ -198,6 +195,7 @@ export const mapState = state => ({
     annotations: state.objectConfig.metadata.annotations,
     name: state.objectConfig.metadata.name,
     namespace: state.objectConfig.metadata.namespace,
+    uid: state.objectConfig.metadata.uid,
   },
   spec: {
     selector: state.objectConfig.spec.selector,

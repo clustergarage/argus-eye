@@ -14,9 +14,17 @@ const reducer = (state = initialState, action) => {
       newState.watchers = action.watchers
       break
     case CREATE_WATCHER:
-      newState.watchers = [...newState.watchers, action.watcher]
+      newState.watchers = [
+        ...newState.watchers,
+        action.watcher,
+      ]
       break
     case UPDATE_WATCHER:
+      newState.watchers = [
+        ...newState.watchers.slice(0, action.index),
+        newState.watchers[action.index] = Object.assign({}, action.watcher),
+        ...newState.watchers.slice(action.index + 1),
+      ]
       break
     case DELETE_WATCHER:
       newState.watchers = [
@@ -34,7 +42,7 @@ export default reducer
 
 export const setWatchers = watchers => ({type: SET_WATCHERS, watchers})
 export const createWatcher = watcher => ({type: CREATE_WATCHER, watcher})
-export const updateWatcher = (index, watcher) => ({type: UPDATE_WATCHER, index, watcher})
+export const updateWatcher = (watcher, index) => ({type: UPDATE_WATCHER, watcher, index})
 export const deleteWatcher = index => ({type: DELETE_WATCHER, index})
 
 export const mapState = state => ({
@@ -44,6 +52,6 @@ export const mapState = state => ({
 export const mapDispatch = dispatch => ({
   dispatchSetWatchers: watchers => dispatch(setWatchers(watchers)),
   dispatchCreateWatcher: watcher => dispatch(createWatcher(watcher)),
-  dispatchUpdateWatcher: (index, watcher) => dispatch(updateWatcher(index, watcher)),
+  dispatchUpdateWatcher: (watcher, index) => dispatch(updateWatcher(watcher, index)),
   dispatchDeleteWatcher: index => dispatch(deleteWatcher(index)),
 })

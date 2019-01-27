@@ -176,8 +176,7 @@ class Watchers extends React.Component {
               <tbody>
                 {this.props.watchers.map((watcher, index) => (
                 <React.Fragment key={watcher.metadata.uid}>
-                  <tr key={watcher.metadata.uid}
-                    className={getRowClass(index)}>
+                  <tr className={getRowClass(index)}>
                     <td className="buttons">
                       <button type="button"
                         disabled={this.props.editing === index}
