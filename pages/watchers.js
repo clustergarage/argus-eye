@@ -117,7 +117,13 @@ class Watchers extends React.Component {
     const response = await deleteArgusWatcher(namespace, name)
     this.props.dispatchDeleteWatcher(index)
     this.toggleDelete(index, false)
-    // @TODO: if current objectConfig in state, reset
+
+    if (this.props.editing === index) {
+      this.props.dispatchSetEditing(null)
+      this.props.dispatchClearSearchState()
+      this.props.dispatchClearConfigState()
+      this.props.dispatchSetLabelSelector('')
+    }
     // @TODO: add spinner, message, complete, error
   }
 
@@ -166,6 +172,15 @@ class Watchers extends React.Component {
       return classes.join(' ')
     }
 
+    const sortWatchers = (a, b) => {
+      const {namespace: ans, name: an} = a.metadata
+      const {namespace: bns, name: bn} = b.metadata
+      if (ans === bns) {
+        return an > bn ? 1 : -1
+      }
+      return (ans > bns) ? 1 : (bn > an) ? -1 : 0
+    }
+
     return (
       <div className="container">
         <div className="row">
@@ -181,7 +196,9 @@ class Watchers extends React.Component {
                 </tr>
               </thead>
               <tbody>
-                {this.props.watchers.map((watcher, index) => (
+                {this.props.watchers
+                  .sort(sortWatchers)
+                  .map((watcher, index) => (
                 <React.Fragment key={watcher.metadata.uid}>
                   <tr className={getRowClass(index)}>
                     <td className="buttons">

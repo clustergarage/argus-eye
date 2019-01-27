@@ -36,10 +36,10 @@ class Index extends React.Component {
   }
 
   onSelectorSubmit(selector) {
-    this.props.dispatchSetSelector(selector)
     this.props.dispatchClearSearchState()
     // @TODO: confirm with the user before clearing config state especially
     this.props.dispatchClearConfigState()
+    this.props.dispatchSetSelector(selector)
   }
 
   onLoadRootDirectory(cid, directory) {

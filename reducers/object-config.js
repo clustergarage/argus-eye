@@ -41,7 +41,8 @@ const initialState = {
       matchLabels: {}
     },
     subjects: [],
-  }
+  },
+  status: {},
 }
 
 const reducer = (state = initialState, action) => {
@@ -66,7 +67,9 @@ const reducer = (state = initialState, action) => {
       ]
       break
     case SET_SELECTOR:
-      newState.spec.selector.matchLabels = tagsToObject(action.selector)
+      newState.spec.selector = {
+        matchLabels: tagsToObject(action.selector),
+      }
       break
     case TOGGLE_EVENT:
       let evtArr = newState.spec.subjects[index].events || []
@@ -151,14 +154,17 @@ const reducer = (state = initialState, action) => {
       newState.spec.logFormat = action.value
       break
     case CLEAR_CONFIG_STATE:
-      Object.assign(newState.metadata, {
-        name: '',
-        namespace: '',
-        uid: '',
-      })
-      Object.assign(newState.spec, {
-        subjects: [],
-        logFormat: null,
+      Object.assign(newState, {
+        metadata: {
+          name: '',
+          namespace: '',
+          uid: '',
+        },
+        spec: {
+          subjects: [],
+          logFormat: null,
+        },
+        status: {},
       })
       break
     case REPLACE_CONFIG_STATE:
@@ -202,6 +208,7 @@ export const mapState = state => ({
     subjects: state.objectConfig.spec.subjects,
     logFormat: state.objectConfig.spec.logFormat,
   },
+  status: state.objectConfig.status,
 })
 
 export const mapDispatch = dispatch => ({

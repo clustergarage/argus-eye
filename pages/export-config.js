@@ -117,12 +117,13 @@ class ExportConfig extends React.Component {
     const {namespace, name} = json.metadata
     const response = await applyArgusWatcher(namespace, name, json)
     if (this.props.editing !== null) {
-      this.props.dispatchUpdateWatcher(json, this.props.editing)
+      this.props.dispatchUpdateWatcher(response, this.props.editing)
+      //this.props.dispatchSetEditing(null)
     } else {
-      this.props.dispatchCreateWatcher(json)
+      this.props.dispatchCreateWatcher(response)
     }
+    this.props.dispatchReplaceConfigState(response)
     // @TODO: add spinner, message, complete, error
-    //this.props.dispatchSetEditing(null)
   }
 
   handleTooltipClick(key) {
@@ -194,6 +195,14 @@ class ExportConfig extends React.Component {
       })
     }
 
+    const normalizeConfig = json => {
+      Object.keys(json).map(key => {
+        if (key === 'status') {
+          delete json[key]
+        }
+      })
+    }
+
     const defaultSortFn = (a, b) => a.localeCompare(b)
     const deepSort = (src, comparator) => {
       let out
@@ -215,6 +224,7 @@ class ExportConfig extends React.Component {
     removeEmpty(json)
     normalizeMetadata(json)
     normalizeEvents(json)
+    normalizeConfig(json)
     return deepSort(json)
   }
 
