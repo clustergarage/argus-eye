@@ -46,32 +46,32 @@ app.prepare()
     //=========================================================================
     //= KUBERNETES - API
 
-    server.get('/k8s/pods/:selector', (req, res) => {
+    server.get('/k8s/pods/:selector', (req, res, next) => {
       assert(req.params.selector)
       k8sApi.listPodForAllNamespaces(null, null, null, req.params.selector)
         .then(result => res.send(result.body))
-        .catch(e => console.error(e))
+        .catch(e => next(e))
     })
 
-    server.get('/k8s/:namespace/pod/:name/containers', (req, res) => {
+    server.get('/k8s/:namespace/pod/:name/containers', (req, res, next) => {
       assert(req.params.namespace)
       assert(req.params.name)
       k8sApi.readNamespacedPod(req.params.name, req.params.namespace)
         .then(result => res.send(result.body))
-        .catch(e => console.error(e))
+        .catch(e => next(e))
     })
 
     //=========================================================================
     //= KUBERNETES - Custom objects API
 
-    server.get('/k8s/arguswatchers', (req, res) => {
+    server.get('/k8s/arguswatchers', (req, res, next) => {
       k8sCustomApi.listClusterCustomObject(CRD_GROUP, CRD_VERSION,
         CRD_RESOURCE/*, null, null, null, true*/) // watch -> response.on('data', chunk => chunk)
         .then(result => res.send(result.body))
-        .catch(e => console.error(e))
+        .catch(e => next(e))
     })
 
-    server.post('/k8s/:namespace/arguswatcher/:name', (req, res) => {
+    server.post('/k8s/:namespace/arguswatcher/:name', (req, res, next) => {
       assert(req.params.namespace)
       assert(req.params.name)
       const namespace = req.params.namespace
@@ -85,20 +85,20 @@ app.prepare()
           k8sCustomApi.patchNamespacedCustomObject(CRD_GROUP, CRD_VERSION,
             namespace, CRD_RESOURCE, name, req.body)
             .then(result => res.send(result.body))
-            .catch(e => console.error(e.body))
+            .catch(e => next(e.body))
         }, reject => {
           if (reject.body.reason === 'NotFound') {
             // no object with this name exists, create new object
             k8sCustomApi.createNamespacedCustomObject(CRD_GROUP, CRD_VERSION,
               namespace, CRD_RESOURCE, req.body)
               .then(result => res.send(result.body))
-              .catch(e => console.error(e.body))
+              .catch(e => next(e.body))
           }
         })
-        .catch(e => console.error(e))
+        .catch(e => next(e))
     })
 
-    server.delete('/k8s/:namespace/arguswatcher/:name', (req, res) => {
+    server.delete('/k8s/:namespace/arguswatcher/:name', (req, res, next) => {
       assert(req.params.namespace)
       assert(req.params.name)
       k8sCustomApi.deleteNamespacedCustomObject(CRD_GROUP, CRD_VERSION,
@@ -106,7 +106,7 @@ app.prepare()
           apiVersion: `${CRD_GROUP}/${CRD_VERSION}`,
         })
         .then(result => res.send(result.body))
-        .catch(e => console.error(e))
+        .catch(e => next(e))
     })
 
     //=========================================================================

@@ -15,7 +15,7 @@ import {
   loadFSTree,
   deleteArgusWatcher,
 } from '../lib/api'
-import {formatLabels} from '../util/util'
+import {formatPath, formatLabels} from '../util/util'
 
 class Watchers extends React.Component {
   constructor(props) {
@@ -59,14 +59,16 @@ class Watchers extends React.Component {
       }))
     }
 
+    this.props.dispatchSelectSubject(0)
+
     let i, j, k, l
     let subject, parts, cp
+    let found = false
 
     for (i = 0; i < containers.length; ++i) {
       cid = containers[i].containerID
       pid = await containerPID(cid)
-      if (i === 0) {
-        this.props.dispatchSelectSubject(i)
+      if (!found) {
         this.props.dispatchSetRootDirectory(cid, `/proc/${pid}/root`)
       }
 
@@ -87,9 +89,14 @@ class Watchers extends React.Component {
                 const files = await loadFSTree(cp)
                 if (files.length) {
                   this.props.dispatchOpenDirectory(cp, files)
+                  files.forEach(file => {
+                    if (formatPath(file.path) === subject.paths[k]) {
+                      found = true
+                    }
+                  })
                 }
               } catch(e) {
-                console.error(e)
+                //console.error(e)
               }
             }
           }

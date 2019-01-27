@@ -122,6 +122,7 @@ class ExportConfig extends React.Component {
       this.props.dispatchCreateWatcher(json)
     }
     // @TODO: add spinner, message, complete, error
+    //this.props.dispatchSetEditing(null)
   }
 
   handleTooltipClick(key) {
