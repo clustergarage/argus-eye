@@ -21,13 +21,19 @@ class Watchers extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      deleteToggle: {}
+      deleteToggle: {},
+      searchFilter: '',
     }
 
+    this.handleSearchFilterChange = this.handleSearchFilterChange.bind(this)
     this.handleEditClick = this.handleEditClick.bind(this)
     this.handleDeleteClick = this.handleDeleteClick.bind(this)
     this.handleConfirmDeleteClick = this.handleConfirmDeleteClick.bind(this)
     this.handleCancelDeleteClick = this.handleCancelDeleteClick.bind(this)
+  }
+
+  handleSearchFilterChange(event) {
+    this.setState({searchFilter: event.target.value})
   }
 
   async handleEditClick(watcher, index) {
@@ -172,6 +178,15 @@ class Watchers extends React.Component {
       return classes.join(' ')
     }
 
+    const filterWatchers = watcher => {
+      const value = this.state.searchFilter.toLowerCase()
+      if (value === '') {
+        return true
+      }
+      return watcher.metadata.namespace.match(value) ||
+        watcher.metadata.name.match(value)
+    }
+
     const sortWatchers = (a, b) => {
       const {namespace: ans, name: an} = a.metadata
       const {namespace: bns, name: bn} = b.metadata
@@ -181,8 +196,35 @@ class Watchers extends React.Component {
       return (ans > bns) ? 1 : (bn > an) ? -1 : 0
     }
 
+    const highlightText = value => {
+      let index = value.indexOf(this.state.searchFilter)
+      if (this.state.searchFilter === '' ||
+        index === -1) {
+        return value
+      }
+      const len = this.state.searchFilter.length
+      return (
+        <span>
+          {value.substring(0, index)}
+          <em>{value.substring(index, index + len)}</em>
+          {value.substring(index + len)}
+        </span>
+      )
+    }
+
     return (
       <div className="container">
+        <div className="row">
+          <div className="column column-33">
+            <label>
+              Filter watchers
+              <input type="text"
+                value={this.state.searchFilter}
+                onChange={this.handleSearchFilterChange}
+                placeholder="Search by namespace / name" />
+            </label>
+          </div>
+        </div>
         <div className="row">
           <div className="column">
             <table>
@@ -197,6 +239,7 @@ class Watchers extends React.Component {
               </thead>
               <tbody>
                 {this.props.watchers
+                  .filter(filterWatchers)
                   .sort(sortWatchers)
                   .map((watcher, index) => (
                 <React.Fragment key={watcher.metadata.uid}>
@@ -214,9 +257,9 @@ class Watchers extends React.Component {
                         delete
                       </button>
                     </td>
-                    <td>
-                      {watcher.metadata.namespace} /&nbsp;
-                      <a>{watcher.metadata.name}</a>
+                    <td className="metadata">
+                      {highlightText(watcher.metadata.namespace)} /&nbsp;
+                      <a>{highlightText(watcher.metadata.name)}</a>
                     </td>
                     <td className="selector">
                       <small>
@@ -450,6 +493,13 @@ class Watchers extends React.Component {
         }
         `}</style>
         <style global jsx>{`
+        table td.metadata em {
+          color: #000;
+          font-style: normal;
+          background-color: #fce588;
+          padding: 0.1rem 0.2rem;
+        }
+
         table td label.option i svg polyline {
           color: #27ab83;
         }
