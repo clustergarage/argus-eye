@@ -161,6 +161,9 @@ const reducer = (state = initialState, action) => {
           uid: '',
         },
         spec: {
+          selector: {
+            matchLabels: {}
+          },
           subjects: [],
           logFormat: null,
         },
