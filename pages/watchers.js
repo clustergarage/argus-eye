@@ -215,7 +215,7 @@ class Watchers extends React.Component {
     return (
       <div className="container">
         <div className="row">
-          <div className="column column-33">
+          <div className="column column-33 filter">
             <label>
               Filter watchers
               <input type="text"
@@ -223,6 +223,10 @@ class Watchers extends React.Component {
                 onChange={this.handleSearchFilterChange}
                 placeholder="Search by namespace / name" />
             </label>
+
+            <div className="results">
+              Showing {this.props.watchers.filter(filterWatchers).length} of {this.props.watchers.length} watchers
+            </div>
           </div>
         </div>
         <div className="row">
@@ -490,6 +494,15 @@ class Watchers extends React.Component {
           background-color: #c6f7e2;
           font-style: normal;
           padding: 0.1rem 0.2rem;
+        }
+
+        .filter input {
+          margin-bottom: 0.5rem;
+        }
+
+        .filter .results {
+          font-size: 1.2rem;
+          margin-bottom: 2rem;
         }
         `}</style>
         <style global jsx>{`

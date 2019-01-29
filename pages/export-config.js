@@ -174,18 +174,20 @@ class ExportConfig extends React.Component {
         }
       })
 
-      let annotations = Object.assign({}, json.metadata.annotations, {
+      json.metadata.annotations = json.metadata.annotations || {}
+
+      Object.assign(json.metadata.annotations, {
         'clustergarage.io/generated-by': 'argus-eye',
         'clustergarage.io/argus-eye.version': VERSION,
       })
-      Object.keys(annotations).map(key => {
+      Object.keys(json.metadata.annotations).map(key => {
         if (key === 'kubectl.kubernetes.io/last-applied-configuration') {
-          delete annotations[key]
+          delete json.metadata.annotations[key]
         }
       })
     }
 
-    const normalizeEvents = json => {
+    const normalizeEvents = json => (
       json.spec.subjects.map(subject => {
         subject.events.map(event => {
           if (EVENT_MAP[event]) {
@@ -193,15 +195,15 @@ class ExportConfig extends React.Component {
           }
         })
       })
-    }
+    )
 
-    const normalizeConfig = json => {
+    const normalizeConfig = json => (
       Object.keys(json).map(key => {
         if (key === 'status') {
           delete json[key]
         }
       })
-    }
+    )
 
     const defaultSortFn = (a, b) => a.localeCompare(b)
     const deepSort = (src, comparator) => {
