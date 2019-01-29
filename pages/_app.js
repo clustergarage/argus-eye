@@ -30,12 +30,12 @@ class ArgusTool extends App {
     return (
       <Container>
         <Provider store={store}>
-          <PersistGate persistor={store.persistor}
-            loading={<div>Loading...</div>}>
-            <Layout {...pageProps}>
+          <Layout {...pageProps}>
+            <PersistGate persistor={store.persistor}
+              loading={<div>Loading...</div>}>
               <Component {...pageProps} />
-            </Layout>
-          </PersistGate>
+            </PersistGate>
+          </Layout>
         </Provider>
       </Container>
     )

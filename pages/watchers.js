@@ -57,7 +57,7 @@ class Watchers extends React.Component {
     if (containers.length > 1) {
       this.props.dispatchSetContainers(containers.map(container => {
         return Object.keys(container)
-          .filter(key => ['containerID', 'name'].includes(key))
+          .filter(key => ['containerID', 'name', 'ready'].includes(key))
           .reduce((obj, key) => {
             obj[key] = container[key]
             return obj
@@ -155,7 +155,13 @@ class Watchers extends React.Component {
         .reduce((obj, key) => {
           obj[key] = pod.metadata[key]
           return obj
-        }, {})
+        }, {}),
+      status: Object.keys(pod.status)
+        .filter(key => ['phase'].includes(key))
+        .reduce((obj, key) => {
+          obj[key] = pod.status[key]
+          return obj
+        }, {}),
     })))
     return pods
   }

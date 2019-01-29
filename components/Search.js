@@ -43,7 +43,7 @@ class Search extends React.Component {
         // make the user choose
         this.props.dispatchSetContainers(containers.map(container => {
           return Object.keys(container)
-            .filter(key => ['containerID', 'name'].includes(key))
+            .filter(key => ['containerID', 'name', 'ready'].includes(key))
             .reduce((obj, key) => {
               obj[key] = container[key]
               return obj
@@ -66,7 +66,13 @@ class Search extends React.Component {
         .reduce((obj, key) => {
           obj[key] = pod.metadata[key]
           return obj
-        }, {})
+        }, {}),
+      status: Object.keys(pod.status)
+        .filter(key => ['phase'].includes(key))
+        .reduce((obj, key) => {
+          obj[key] = pod.status[key]
+          return obj
+        }, {}),
     })))
     return pods
   }
@@ -101,10 +107,11 @@ class Search extends React.Component {
           Found <em>{this.props.pods.length}</em> pod{this.props.pods.length !== 1 && 's'}
           <div>
             {this.props.pods.map(pod => (
-              <a key={pod.metadata.uid}>
-                <span>{pod.metadata.namespace}/</span>
-                {pod.metadata.name}
-              </a>
+            <a key={pod.metadata.uid}>
+              <span>{pod.metadata.namespace}/</span>
+              {pod.metadata.name}
+              {pod.status && <span>&nbsp;(<em>{pod.status.phase}</em>)</span>}
+            </a>
             ))}
           </div>
         </label>}
@@ -116,9 +123,11 @@ class Search extends React.Component {
           </label>
           {this.props.containers.map(container => (
             <a key={container.containerID}
+              disabled={!container.ready}
               className={`button button-small ${this.props.selectedContainer !== container.containerID ? 'button-outline' : ''}`}
               onClick={() => this.handleContainerClick(container.containerID)}>
               {container.name}
+              {!container.ready && <span>&nbsp;(not ready)</span>}
             </a>
           ))}
         </div>}
@@ -147,6 +156,7 @@ class Search extends React.Component {
           }
 
           .found-pods a {
+            display: inline-block;
             color: #486581;
             font: 1.4rem 'Ubuntu Mono', monospace;
             font-weight: normal;
@@ -155,6 +165,11 @@ class Search extends React.Component {
 
           .found-pods a span {
             color: #9fb3c8;
+          }
+
+          .found-pods a span em {
+            background-color: #f2ebfe;
+            padding: 0.1rem 0.2rem;
           }
 
           .container-select {
