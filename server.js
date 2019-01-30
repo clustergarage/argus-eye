@@ -8,7 +8,12 @@ const express = require('express'),
   dockerode = require('dockerode')
 
 const dev = process.env.NODE_ENV !== 'production'
-const app = next({dev})
+const nextConfig = require('./next.config')
+const app = next({
+  dev,
+  dir: __dirname,
+  conf: nextConfig,
+})
 const handle = app.getRequestHandler()
 // @TODO: add other container runtimes
 const docker = new dockerode({socketPath: '/var/run/docker.sock'})
@@ -21,18 +26,19 @@ const CRD_RESOURCE = 'arguswatchers'
 // until this is fixed, the patch* commands are not setting the proper headers
 class K8sCustomObjectsApi extends k8s.Custom_objectsApi {
   patchNamespacedCustomObject(...args) {
-    const oldDefaultHeaders = this.defaultHeaders;
+    const oldDefaultHeaders = this.defaultHeaders
     this.defaultHeaders = {
       'Content-Type': 'application/merge-patch+json',
       ...this.defaultHeaders,
-    };
-    const returnValue = super.patchNamespacedCustomObject.apply(this, args);
-    this.defaultHeaders = oldDefaultHeaders;
-    return returnValue;
+    }
+    const returnValue = super.patchNamespacedCustomObject.apply(this, args)
+    this.defaultHeaders = oldDefaultHeaders
+    return returnValue
   }
 }
 
 const kc = new k8s.KubeConfig()
+// @TODO: optionally take a specific API endpoint
 kc.loadFromDefault()
 const k8sApi = kc.makeApiClient(k8s.Core_v1Api)
 const k8sCustomApi = kc.makeApiClient(K8sCustomObjectsApi/*k8s.Custom_objectsApi*/)

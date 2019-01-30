@@ -4,8 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "node server.js",
     "build": "next build",
+    "dev": "node server.js",
     "export": "next export",
     "start": "cross-env NODE_ENV=production node server.js"
   },
