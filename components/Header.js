@@ -33,16 +33,22 @@ class Header extends React.Component {
         </h1>
 
         <div className="header">
-          <ActiveLink prefetch href="/watchers">
+          <ActiveLink href="/watchers"
+            as="/watchers"
+            prefetch>
             <a>
               Watchers&nbsp;
               <small><em>{this.props.watchers.length}</em></small>
             </a>
           </ActiveLink>
-          <ActiveLink prefetch href="/">
+          <ActiveLink href="/index"
+            as="/"
+            prefetch>
             <a>Visual editor</a>
           </ActiveLink>
-          <ActiveLink prefetch href="/export-config">
+          <ActiveLink href="/export-config"
+            as="/export-config"
+            prefetch>
             <a>Export configuration</a>
           </ActiveLink>
         </div>
